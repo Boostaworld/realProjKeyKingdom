@@ -2,18 +2,17 @@
   "name": "temp-nextjs",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev --webpack",
-  "build": "next build --webpack",
-  "start": "next start",
-  "lint": "echo \"Skipping lint in Codex Web\"",
-  "db:seed": "node prisma/seed.js",
-  "db:studio": "prisma studio",
-  "db:migrate": "prisma migrate dev",
-  "db:generate": "prisma generate",
-  "api:create-key": "tsx scripts/create-api-key.ts"
-}
-
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "echo \"Skipping lint in Codex Web\"",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "api:create-key": "tsx scripts/create-api-key.ts"
+  },
   "prisma": {
     "seed": "node prisma/seed.js"
   },
