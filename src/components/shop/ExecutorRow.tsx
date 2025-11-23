@@ -1,278 +1,163 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { AnimatePresence, motion } from "framer-motion";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { ChevronDown, Star } from "lucide-react";
 import { SuncBadge } from "@/components/shared/SuncBadge";
 import { StatusIndicator } from "@/components/shared/StatusIndicator";
-import { CategoryBadge } from "@/components/shared/CategoryBadge";
 import { formatPrice, formatRelativeTime } from "@/lib/utils/formatters";
-import { useAppStore } from "@/lib/store/appStore";
-import { cn } from "@/lib/utils/cn";
 import type { Executor } from "@/types/executor";
 
 interface ExecutorRowProps {
   executor: Executor;
-  index: number;
 }
 
-export function ExecutorRow({ executor, index }: ExecutorRowProps) {
-  const router = useRouter();
-  const { expandedRow, setExpandedRow } = useAppStore();
-  const isExpanded = expandedRow === executor.id;
+export function ExecutorRow({ executor }: ExecutorRowProps) {
+  const [expanded, setExpanded] = useState(false);
 
-  const toggleExpand = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setExpandedRow(isExpanded ? null : executor.id);
-  };
+  const platforms = useMemo(
+    () =>
+      Object.entries(executor.platforms)
+        .filter(([, supported]) => supported)
+        .map(([platform]) => platform),
+    [executor.platforms]
+  );
 
-  const handleBuyNow = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handlePurchase = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     if (!executor.pricing.purchaseUrl) return;
     window.open(executor.pricing.purchaseUrl, "_blank", "noopener,noreferrer");
   };
 
-  const platforms = Object.entries(executor.platforms)
-    .filter(([, supported]) => supported)
-    .map(([platform]) => platform);
-
   return (
-    <motion.tr
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="border-b border-white/5"
-    >
-      <td colSpan={8} className="p-0">
-        <div>
-          {/* Main Row */}
-          <motion.div
-            className={cn(
-              "grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 px-4 py-3 cursor-pointer items-center",
-              "rounded-2xl border border-white/10 bg-gradient-to-br from-[rgba(21,26,33,0.85)] to-[rgba(30,35,41,0.9)]",
-              "backdrop-blur-xl shadow-glass transition-all duration-200",
-              isExpanded && "border-primary/40 shadow-glass-hover"
-            )}
-            onClick={toggleExpand}
-            whileHover={{ y: -3, boxShadow: "0 12px 28px rgba(88, 101, 242, 0.2)" }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Executor Column */}
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: isExpanded ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronDown className="h-4 w-4 text-text-muted" />
-              </motion.div>
-              <div className="w-10 h-10 rounded-xl bg-[rgba(30,35,41,0.7)] border border-white/10 backdrop-blur-xl flex items-center justify-center text-2xl shadow-inner shadow-glass">
-                {executor.name[0]}
-              </div>
-              <div>
-                <div className="font-semibold text-text-primary">
-                  {executor.name}
-                </div>
-                <div className="text-sm text-text-muted line-clamp-1">
-                  {executor.description}
-                </div>
-              </div>
-            </div>
-
-            {/* sUNC Column */}
-            <div>
-              <SuncBadge rating={executor.suncRating} size="sm" showLabel={false} />
-            </div>
-
-            {/* Status Column */}
-            <div>
-              <StatusIndicator status={executor.status} compact />
-            </div>
-
-            {/* Platform Column */}
-            <div className="flex gap-1 flex-wrap">
-              {platforms.slice(0, 2).map((platform) => (
-                <div
-                  key={platform}
-                  className="h-6 px-2 rounded-full bg-white/5 border border-white/10 text-[11px] text-text-secondary flex items-center capitalize backdrop-blur-sm"
-                >
-                  {platform}
-                </div>
-              ))}
-              {platforms.length > 2 && (
-                <div className="h-6 px-2 rounded-full bg-background-elevated text-[11px] text-text-muted flex items-center">
-                  +{platforms.length - 2}
-                </div>
-              )}
-            </div>
-
-            {/* Category Column */}
-            <div>
-              <CategoryBadge category={executor.category} />
-            </div>
-
-            {/* Rating Column */}
-            <div className="flex items-center gap-1">
-              <span className="text-warning">★</span>
-              <span className="font-medium text-text-primary text-sm">
-                {executor.rating.average.toFixed(1)}
-              </span>
-              <span className="text-xs text-text-muted">
-                ({executor.rating.count.toLocaleString()})
-              </span>
-            </div>
-
-            {/* Price Column */}
-            <div className="font-semibold text-text-primary">
-              {formatPrice(executor.pricing.price, executor.pricing.currency)}
-            </div>
-
-            {/* Actions Column */}
-            <div
-              className="flex items-center gap-2"
-              onClick={(e) => e.stopPropagation()}
+    <>
+      <motion.tr
+        className="cursor-pointer border-b border-white/5 bg-background-tertiary/40 transition-colors duration-200 hover:bg-primary/5"
+        onClick={() => setExpanded((prev) => !prev)}
+        whileHover={{ backgroundColor: "rgba(88, 101, 242, 0.06)" }}
+      >
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-3">
+            <motion.div
+              animate={{ rotate: expanded ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-text-muted"
             >
-              <Button variant="primary" size="sm" onClick={handleBuyNow}>
-                Buy Now
-              </Button>
+              <ChevronDown className="h-4 w-4" />
+            </motion.div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background-secondary text-lg font-bold">
+              {executor.name[0]}
             </div>
-          </motion.div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-medium text-text-primary">{executor.name}</div>
+              <div className="truncate text-xs text-text-muted">{executor.description}</div>
+            </div>
+          </div>
+        </td>
 
-          {/* Expanded Details */}
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-[rgba(15,18,24,0.9)] backdrop-blur-2xl shadow-glass"
+        <td className="px-4 py-3 text-center">
+          <div className="flex justify-center">
+            <SuncBadge rating={executor.suncRating} size="sm" showLabel={false} showGlow={false} />
+          </div>
+        </td>
+
+        <td className="px-4 py-3 text-center">
+          <StatusIndicator status={executor.status} compact />
+        </td>
+
+        <td className="px-4 py-3 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-1 text-xs text-text-secondary">
+            {platforms.map((platform) => (
+              <span
+                key={platform}
+                className="rounded-md bg-background-secondary px-2 py-1 capitalize"
               >
-                <div className="p-6 grid grid-cols-2 gap-6">
-                  {/* Left Column */}
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        About
-                      </h3>
-                      <p className="text-sm text-text-primary">
-                        {executor.longDescription || executor.description}
-                      </p>
-                    </div>
+                {platform}
+              </span>
+            ))}
+          </div>
+        </td>
 
+        <td className="px-4 py-3 text-center">
+          <div className="flex items-center justify-center gap-1 text-sm text-text-primary">
+            <Star className="h-4 w-4 text-warning" />
+            <span>{executor.rating.average.toFixed(1)}</span>
+            <span className="text-xs text-text-muted">({executor.rating.count})</span>
+          </div>
+        </td>
+
+        <td className="px-4 py-3 text-center">
+          <span className="font-medium text-text-primary">
+            {executor.pricing.rawCostString ||
+              formatPrice(executor.pricing.price, executor.pricing.currency)}
+          </span>
+        </td>
+
+        <td className="px-4 py-3 text-right">
+          <button
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/80"
+            onClick={handlePurchase}
+          >
+            {executor.pricing.price ? "Buy Now" : "Download"}
+          </button>
+        </td>
+      </motion.tr>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.tr
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="bg-background-secondary/40"
+          >
+            <td colSpan={7} className="px-4 py-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold text-text-primary">About</h3>
+                  <p className="text-sm text-text-secondary">
+                    {executor.longDescription || executor.description}
+                  </p>
+
+                  {executor.features.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        Key Features
-                      </h3>
-                      <ul className="space-y-1">
-                        {executor.keyFeatures?.map((feature, i) => (
-                          <li key={i} className="text-sm text-text-primary flex items-start gap-2">
-                            <span className="text-primary">•</span>
-                            {feature}
-                          </li>
+                      <h4 className="text-sm font-semibold text-text-primary mb-2">Key Features</h4>
+                      <ul className="list-inside list-disc space-y-1 text-sm text-text-secondary">
+                        {executor.features.map((feature, index) => (
+                          <li key={index}>{feature}</li>
                         ))}
                       </ul>
                     </div>
+                  )}
+                </div>
 
-                    <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        All Features
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {executor.features.map((feature, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-1 rounded-md bg-background-elevated text-xs text-text-secondary"
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold text-text-primary">Status Details</h3>
+                  <div className="space-y-2 text-sm text-text-secondary">
+                    <div className="flex justify-between rounded-lg border border-white/5 bg-background-tertiary/60 px-3 py-2">
+                      <span>Working</span>
+                      <span className={executor.status.working ? "text-success" : "text-danger"}>
+                        {executor.status.working ? "Operational" : "Offline"}
+                      </span>
                     </div>
-                  </div>
-
-                  {/* Right Column */}
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        Status Details
-                      </h3>
-                      <StatusIndicator status={executor.status} compact={false} />
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        Roblox Version
-                      </h3>
-                      <p className="text-sm font-mono text-text-primary bg-background-elevated px-3 py-2 rounded-md">
+                    <div className="flex justify-between rounded-lg border border-white/5 bg-background-tertiary/60 px-3 py-2">
+                      <span>Roblox Version</span>
+                      <span className="font-mono text-text-primary">
                         {executor.status.robloxVersion}
-                      </p>
+                      </span>
                     </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        Last Updated
-                      </h3>
-                      <p className="text-sm text-text-primary">
-                        {formatRelativeTime(executor.status.lastChecked)}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {new Date(executor.status.lastChecked).toLocaleString()}
-                      </p>
+                    <div className="flex justify-between rounded-lg border border-white/5 bg-background-tertiary/60 px-3 py-2">
+                      <span>Last Updated</span>
+                      <span>{formatRelativeTime(executor.status.lastChecked)}</span>
                     </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                        Platform Support
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {platforms.map((platform) => (
-                          <div
-                            key={platform}
-                            className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm text-primary capitalize"
-                          >
-                            {platform}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {executor.links && (
-                      <div>
-                        <h3 className="text-sm font-semibold text-text-secondary mb-2">
-                          Links
-                        </h3>
-                        <div className="space-y-2">
-                          {executor.links.website && (
-                            <a
-                              href={executor.links.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-primary hover:underline block"
-                            >
-                              Website →
-                            </a>
-                          )}
-                          {executor.links.discord && (
-                            <a
-                              href={executor.links.discord}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-primary hover:underline block"
-                            >
-                              Discord →
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </td>
-    </motion.tr>
+              </div>
+            </td>
+          </motion.tr>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
