@@ -50,10 +50,12 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
           <motion.div
             className={cn(
               "grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 px-4 py-3 cursor-pointer items-center",
-              "glass-surface glass-surface-hover rounded-xl border border-white/10 shadow-glass"
+              "rounded-2xl border border-white/10 bg-gradient-to-br from-[rgba(21,26,33,0.85)] to-[rgba(30,35,41,0.9)]",
+              "backdrop-blur-xl shadow-glass transition-all duration-200",
+              isExpanded && "border-primary/40 shadow-glass-hover"
             )}
             onClick={toggleExpand}
-            whileHover={{ y: -2 }}
+            whileHover={{ y: -3, boxShadow: "0 12px 28px rgba(88, 101, 242, 0.2)" }}
             transition={{ duration: 0.2 }}
           >
             {/* Executor Column */}
@@ -64,7 +66,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
               >
                 <ChevronDown className="h-4 w-4 text-text-muted" />
               </motion.div>
-              <div className="w-10 h-10 rounded-lg bg-[rgba(30,35,41,0.65)] border border-white/10 backdrop-blur-lg flex items-center justify-center text-2xl shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-[rgba(30,35,41,0.7)] border border-white/10 backdrop-blur-xl flex items-center justify-center text-2xl shadow-inner shadow-glass">
                 {executor.name[0]}
               </div>
               <div>
@@ -92,7 +94,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
               {platforms.slice(0, 2).map((platform) => (
                 <div
                   key={platform}
-                  className="h-6 px-2 rounded-full bg-background-elevated text-[11px] text-text-secondary flex items-center capitalize"
+                  className="h-6 px-2 rounded-full bg-white/5 border border-white/10 text-[11px] text-text-secondary flex items-center capitalize backdrop-blur-sm"
                 >
                   {platform}
                 </div>
@@ -144,7 +146,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="overflow-hidden rounded-xl border border-white/10 bg-[rgba(21,26,33,0.85)] backdrop-blur-2xl shadow-glass"
+                className="overflow-hidden rounded-2xl border border-white/10 bg-[rgba(15,18,24,0.9)] backdrop-blur-2xl shadow-glass"
               >
                 <div className="p-6 grid grid-cols-2 gap-6">
                   {/* Left Column */}

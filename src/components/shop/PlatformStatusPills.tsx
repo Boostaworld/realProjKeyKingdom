@@ -40,19 +40,25 @@ export function PlatformStatusPills() {
               key={platform}
               onClick={() => toggleExpand(platform)}
               className={cn(
-                "flex min-w-[140px] items-center justify-between gap-2 rounded-full px-4 py-2",
-                "glass-surface glass-surface-hover border-white/10 shadow-glass",
-                isExpanded && "border-primary/60 shadow-glass-hover"
+                "group flex min-w-[160px] items-center justify-between gap-3 rounded-full px-4 py-2",
+                "bg-gradient-to-br from-[rgba(21,26,33,0.9)] to-[rgba(30,35,41,0.9)]",
+                "backdrop-blur-xl border border-white/10 shadow-glass transition-all duration-200",
+                isExpanded && "border-primary/50 shadow-glass-hover"
               )}
-              whileHover={{ scale: 1.02, y: -2 }}
+              whileHover={{
+                scale: 1.02,
+                y: -2,
+                boxShadow: "0 10px 28px rgba(88, 101, 242, 0.28)",
+              }}
               whileTap={{ scale: 0.98 }}
               disabled={isLoading && !versions}
+              aria-pressed={isExpanded}
             >
               <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4 text-text-secondary" />
-                <span className="text-sm font-medium text-text-primary">
-                  {platformConfig[platform].label}
-                </span>
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 border border-white/10">
+                  <Icon className="h-4 w-4 text-text-secondary" />
+                </div>
+                <span className="text-sm font-medium text-text-primary">{platformConfig[platform].label}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-text-muted">
                 {versionHash ? (
@@ -61,7 +67,7 @@ export function PlatformStatusPills() {
                   <span className="font-mono text-text-muted">…</span>
                 )}
                 <span
-                  className="h-2 w-2 rounded-full bg-success shadow-[0_0_12px_rgba(67,181,129,0.6)]"
+                  className="h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_12px_rgba(67,181,129,0.6)] animate-pulse"
                   aria-hidden
                 />
               </div>
@@ -78,7 +84,7 @@ export function PlatformStatusPills() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="overflow-hidden rounded-xl border border-white/10 bg-[rgba(21,26,33,0.85)] p-4 backdrop-blur-2xl shadow-glass"
+            className="overflow-hidden rounded-2xl border border-white/10 bg-[rgba(15,18,24,0.85)] p-4 backdrop-blur-2xl shadow-glass"
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">

@@ -37,14 +37,14 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      whileHover={{ y: -4 }}
-      className="glass-card overflow-hidden shadow-glass hover:shadow-glass-hover transition-shadow duration-300"
+      whileHover={{ y: -6, scale: 1.01, boxShadow: "0 14px 32px rgba(88, 101, 242, 0.25)" }}
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[rgba(21,26,33,0.9)] to-[rgba(30,35,41,0.95)] backdrop-blur-2xl shadow-glass transition-all duration-300"
     >
       {/* Card Header */}
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
-            <div className="w-12 h-12 rounded-lg bg-[rgba(30,35,41,0.65)] border border-white/10 backdrop-blur-lg flex items-center justify-center text-2xl shrink-0 shadow-inner">
+            <div className="w-12 h-12 rounded-xl bg-[rgba(30,35,41,0.7)] border border-white/10 backdrop-blur-xl flex items-center justify-center text-2xl shrink-0 shadow-inner shadow-glass">
               {executor.name[0]}
             </div>
             <div className="flex-1 min-w-0">
@@ -84,7 +84,7 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
           {platforms.map((platform) => (
             <div
               key={platform}
-              className="h-6 px-2 rounded-full bg-[rgba(30,35,41,0.65)] border border-white/10 text-[11px] text-text-secondary flex items-center capitalize backdrop-blur-sm"
+              className="h-6 px-2 rounded-full bg-white/5 border border-white/10 text-[11px] text-text-secondary flex items-center capitalize backdrop-blur-md shadow-inner"
             >
               {platform}
             </div>
