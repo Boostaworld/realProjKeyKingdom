@@ -8,16 +8,15 @@ import { useRDD } from '@/lib/rdd/useRDD';
 
 export default function RDDPage() {
   const [config, setConfig] = useState({
-    platform: 'windows' as const,
-    target: 'player' as const,
+    binaryType: 'WindowsPlayer' as const,
     channel: 'LIVE',
     version: '',
     versionMode: 'latest' as const,
     compress: true,
-    compressionLevel: 6, // Balanced compression (0-9 scale)
+    compressionLevel: 5, // Balanced compression (1-9 scale, default 5)
   });
 
-  const { logs, progress, isDownloading, startDownload, clearLogs } = useRDD();
+  const { logs, isDownloading, startDownload, clearLogs } = useRDD();
 
   return (
     <div className="min-h-screen bg-[#0B0E11] text-white">
@@ -34,7 +33,7 @@ export default function RDDPage() {
           </h1>
           <p className="text-text-secondary text-lg max-w-2xl">
             Download any version of Roblox Player or Studio directly from Roblox&apos;s CDN.
-            All processing happens in your browser - no server required.
+            Powered by <a href="https://rdd.latte.to" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Latte&apos;s RDD</a> - fast, reliable, and battle-tested.
           </p>
         </motion.div>
 
@@ -54,7 +53,7 @@ export default function RDDPage() {
 
           <RDDTerminal
             logs={logs}
-            progress={progress}
+            progress={{ current: 0, total: 0 }}
             onClear={clearLogs}
           />
         </motion.div>
@@ -69,8 +68,16 @@ export default function RDDPage() {
           <h3 className="text-sm font-semibold mb-2 text-text-primary">About RDD</h3>
           <p className="text-sm text-text-secondary">
             RDD is an open-source tool (MIT license) that downloads official Roblox binaries
-            directly from Roblox&apos;s CDN. No server-side processing is involved - everything
-            runs in your browser using JSZip. Learn more at{' '}
+            directly from Roblox&apos;s CDN. This tool delegates all downloads to{' '}
+            <a
+              href="https://rdd.latte.to"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              rdd.latte.to
+            </a>
+            {' '}for optimal performance. Learn more at{' '}
             <a
               href="https://github.com/latte-soft/rdd"
               target="_blank"
@@ -92,24 +99,24 @@ export default function RDDPage() {
           <div className="p-4 bg-background-surface rounded-lg border border-white/10">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-[#43B581]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <h4 className="font-semibold text-text-primary">100% Client-Side</h4>
+              <h4 className="font-semibold text-text-primary">Fast & Optimized</h4>
             </div>
             <p className="text-xs text-text-secondary">
-              No data is sent to any server. Everything runs locally in your browser.
+              Powered by Latte&apos;s RDD - battle-tested implementation with parallel downloads and optimized ZIP assembly.
             </p>
           </div>
 
           <div className="p-4 bg-background-surface rounded-lg border border-white/10">
             <div className="flex items-center gap-2 mb-2">
               <svg className="w-5 h-5 text-[#5865F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <h4 className="font-semibold text-text-primary">Fast Downloads</h4>
+              <h4 className="font-semibold text-text-primary">Official Sources</h4>
             </div>
             <p className="text-xs text-text-secondary">
-              Direct downloads from Roblox&apos;s official CDN with parallel processing.
+              Downloads directly from Roblox&apos;s official CDN - no third-party mirrors or modifications.
             </p>
           </div>
 
@@ -118,10 +125,10 @@ export default function RDDPage() {
               <svg className="w-5 h-5 text-[#00E5FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h4 className="font-semibold text-text-primary">Version History</h4>
+              <h4 className="font-semibold text-text-primary">Version Flexibility</h4>
             </div>
             <p className="text-xs text-text-secondary">
-              Download current or historical versions for testing and compatibility.
+              Download latest versions automatically or specify exact version hashes for testing and compatibility.
             </p>
           </div>
         </motion.div>
