@@ -2,22 +2,23 @@
   "name": "temp-nextjs",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "echo \"Skipping lint in Codex Web\"",
-    "db:seed": "node prisma/seed.js",
-    "db:studio": "prisma studio",
-    "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate",
-    "api:create-key": "tsx scripts/create-api-key.ts"
-  },
+"scripts": {
+  "dev": "next dev --webpack",
+  "build": "next build --webpack",
+  "start": "next start",
+  "lint": "echo \"Skipping lint in Codex Web\"",
+  "db:seed": "node prisma/seed.js",
+  "db:studio": "prisma studio",
+  "db:migrate": "prisma migrate dev",
+  "db:generate": "prisma generate",
+  "api:create-key": "tsx scripts/create-api-key.ts"
+}
+
   "prisma": {
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@libsql/client": "^0.15.15",
+    "@libsql/client": "0.8.1",
     "@prisma/adapter-libsql": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@tanstack/react-query": "^5.90.10",
