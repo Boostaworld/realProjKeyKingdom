@@ -138,9 +138,9 @@ body {
 
 /* Glassmorphism Utilities */
 .glass-surface {
-  background: linear-gradient(135deg, rgba(21, 26, 33, 0.6) 0%, rgba(30, 35, 41, 0.6) 100%);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 35, 41, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--shadow-glass);
 }
 
@@ -149,9 +149,9 @@ body {
 }
 
 .glass-surface-hover:hover {
-  background: linear-gradient(135deg, rgba(30, 35, 41, 0.8) 0%, rgba(30, 35, 41, 0.7) 100%);
-  backdrop-filter: blur(12px);
-  border-color: rgba(88, 101, 242, 0.4);
+  background: rgba(30, 35, 41, 0.75);
+  backdrop-filter: blur(20px);
+  border-color: rgba(88, 101, 242, 0.45);
   box-shadow: var(--shadow-glass-hover);
   transform: translateY(-2px);
 }
