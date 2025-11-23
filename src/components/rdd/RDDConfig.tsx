@@ -108,7 +108,10 @@ export function RDDConfig({
           <select
             value={config.channel}
             onChange={(e) => onChange({ ...config, channel: e.target.value })}
-            className="w-full h-10 px-3 rounded-lg border border-background-elevated bg-background-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+            className="w-full h-10 px-4 rounded-lg border border-white/10 bg-background-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-colors backdrop-blur-sm"
+            style={{
+              background: 'linear-gradient(135deg, rgba(21, 26, 33, 0.7) 0%, rgba(30, 35, 41, 0.7) 100%)',
+            }}
           >
             <option value="LIVE">LIVE (Production)</option>
             <option value="zintegration">Beta</option>

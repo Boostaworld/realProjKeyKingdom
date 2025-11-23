@@ -113,9 +113,12 @@ export function PlatformStatusPills() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="overflow-hidden rounded-2xl border border-white/10 bg-[rgba(15,18,24,0.85)] p-4 backdrop-blur-2xl shadow-glass"
+            className="overflow-hidden rounded-xl border border-white/10 backdrop-blur-xl shadow-glass"
+            style={{
+              background: 'linear-gradient(135deg, rgba(21, 26, 33, 0.85) 0%, rgba(30, 35, 41, 0.85) 100%)',
+            }}
           >
-              <div className="space-y-2">
+              <div className="px-4 py-3 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-text-primary">
                     {platformConfig[expanded].label} Version
@@ -134,7 +137,11 @@ export function PlatformStatusPills() {
 
                 <div className="space-y-1">
                   <div className="text-xs text-text-muted">Version Hash</div>
-                  <code className="block rounded-lg bg-[rgba(30,35,41,0.65)] px-3 py-2 font-mono text-sm text-text-primary border border-white/10">
+                  <code className="block rounded-lg px-3 py-1.5 font-mono text-sm text-text-primary border border-white/10 backdrop-blur-sm"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(30, 35, 41, 0.65) 0%, rgba(21, 26, 33, 0.65) 100%)',
+                    }}
+                  >
                   {platformStatuses?.[expanded]?.version ?? versions?.[expanded] ?? "Awaiting data"}
                   </code>
                 </div>
@@ -145,7 +152,7 @@ export function PlatformStatusPills() {
                     : "Awaiting latest check"}
                 </div>
 
-                <div className="text-xs text-text-secondary leading-relaxed bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                <div className="text-xs text-text-secondary leading-relaxed bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
                   {statusError
                     ? "WEAO status temporarily unavailable; showing cached Roblox version data."
                     : `Live Roblox platform data via WEAO (last sync ${formatRelativeTime(
