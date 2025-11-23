@@ -1,0 +1,193 @@
+[
+  {
+    "id": "solara",
+    "slug": "solara",
+    "name": "Solara",
+    "description": "Free, powerful executor with high safety rating",
+    "longDescription": "Solara is a trusted free executor known for excellent stability and safety. Perfect for beginners and experienced users alike.",
+    "logo": "/executors/solara.png",
+    "suncRating": 98,
+    "category": "reputable",
+    "status": {
+      "working": true,
+      "robloxVersion": "version-unknown",
+      "lastChecked": "2025-11-23T00:00:00Z"
+    },
+    "platforms": {
+      "windows": true,
+      "mac": false,
+      "mobile": true,
+      "android": false
+    },
+    "pricing": {
+      "type": "free",
+      "price": 0,
+      "currency": "USD",
+      "purchaseUrl": "https://example.com/solara"
+    },
+    "rating": {
+      "average": 4.8,
+      "count": 1247
+    },
+    "links": {
+      "website": "https://example.com/solara",
+      "discord": "https://discord.gg/solara"
+    },
+    "features": [
+      "Regular updates",
+      "High compatibility",
+      "Active community",
+      "No key system"
+    ],
+    "keyFeatures": [
+      "98% sUNC Safety",
+      "Free Forever",
+      "Weekly Updates"
+    ],
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2025-11-23T00:00:00Z",
+    "verified": true,
+    "popular": true
+  },
+  {
+    "id": "wave",
+    "slug": "wave",
+    "name": "Wave",
+    "description": "Premium executor with advanced features",
+    "longDescription": "Wave offers premium features and excellent performance for power users who demand the best.",
+    "logo": "/executors/wave.png",
+    "suncRating": 95,
+    "category": "reputable",
+    "status": {
+      "working": true,
+      "robloxVersion": "version-unknown",
+      "lastChecked": "2025-11-23T00:00:00Z"
+    },
+    "platforms": {
+      "windows": true,
+      "mac": true,
+      "mobile": false,
+      "android": false
+    },
+    "pricing": {
+      "type": "paid",
+      "price": 10,
+      "currency": "USD",
+      "purchaseUrl": "https://example.com/wave"
+    },
+    "rating": {
+      "average": 4.6,
+      "count": 856
+    },
+    "links": {
+      "website": "https://example.com/wave",
+      "discord": "https://discord.gg/wave"
+    },
+    "features": [
+      "Advanced scripting",
+      "Premium support",
+      "Lifetime updates",
+      "Multi-platform"
+    ],
+    "keyFeatures": [
+      "95% sUNC Safety",
+      "Mac Support",
+      "Premium Features"
+    ],
+    "createdAt": "2024-02-01T00:00:00Z",
+    "updatedAt": "2025-11-23T00:00:00Z",
+    "verified": true,
+    "popular": true
+  },
+  {
+    "id": "executor-x",
+    "slug": "executor-x",
+    "name": "Executor X",
+    "description": "Budget-friendly option with basic features",
+    "longDescription": "Executor X provides essential functionality at an affordable price point.",
+    "logo": "/executors/executor-x.png",
+    "suncRating": 72,
+    "category": "reputable",
+    "status": {
+      "working": true,
+      "robloxVersion": "version-unknown",
+      "lastChecked": "2025-11-23T00:00:00Z"
+    },
+    "platforms": {
+      "windows": true,
+      "mac": false,
+      "mobile": false,
+      "android": false
+    },
+    "pricing": {
+      "type": "paid",
+      "price": 5,
+      "currency": "USD",
+      "purchaseUrl": "https://example.com/executor-x"
+    },
+    "rating": {
+      "average": 4.2,
+      "count": 432
+    },
+    "links": {
+      "website": "https://example.com/executor-x"
+    },
+    "features": [
+      "Basic scripting",
+      "Lightweight",
+      "Affordable"
+    ],
+    "keyFeatures": [
+      "72% sUNC Safety",
+      "Budget Friendly",
+      "Windows Only"
+    ],
+    "createdAt": "2024-03-01T00:00:00Z",
+    "updatedAt": "2025-11-23T00:00:00Z",
+    "verified": true,
+    "popular": false
+  },
+  {
+    "id": "sketchy-exec",
+    "slug": "sketchy-exec",
+    "name": "Sketchy Exec",
+    "description": "Unverified executor - use with caution",
+    "longDescription": "This executor has not been thoroughly verified. Proceed with extreme caution.",
+    "logo": "/executors/sketchy.png",
+    "suncRating": 35,
+    "category": "suspicious",
+    "status": {
+      "working": false,
+      "robloxVersion": "version-unknown",
+      "lastChecked": "2025-11-23T00:00:00Z"
+    },
+    "platforms": {
+      "windows": true,
+      "mac": false,
+      "mobile": false,
+      "android": false
+    },
+    "pricing": {
+      "type": "free",
+      "price": 0,
+      "currency": "USD",
+      "purchaseUrl": "https://example.com/sketchy"
+    },
+    "rating": {
+      "average": 2.1,
+      "count": 89
+    },
+    "features": [
+      "Unreliable updates",
+      "Limited support"
+    ],
+    "keyFeatures": [
+      "35% sUNC - DANGEROUS",
+      "Not Recommended"
+    ],
+    "createdAt": "2024-04-01T00:00:00Z",
+    "updatedAt": "2025-11-23T00:00:00Z",
+    "verified": false,
+    "popular": false
+  }
+]
