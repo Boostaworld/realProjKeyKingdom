@@ -15,6 +15,90 @@ export interface RDDLog {
   timestamp: Date;
 }
 
+const extractRoots: Record<'player' | 'studio', Record<string, string>> = {
+  player: {
+    'RobloxApp.zip': '',
+    'redist.zip': '',
+    'shaders.zip': 'shaders/',
+    'ssl.zip': 'ssl/',
+    'WebView2.zip': '',
+    'WebView2RuntimeInstaller.zip': 'WebView2RuntimeInstaller/',
+    'content-avatar.zip': 'content/avatar/',
+    'content-configs.zip': 'content/configs/',
+    'content-fonts.zip': 'content/fonts/',
+    'content-sky.zip': 'content/sky/',
+    'content-sounds.zip': 'content/sounds/',
+    'content-textures2.zip': 'content/textures/',
+    'content-models.zip': 'content/models/',
+    'content-platform-fonts.zip': 'PlatformContent/pc/fonts/',
+    'content-platform-dictionaries.zip': 'PlatformContent/pc/shared_compression_dictionaries/',
+    'content-terrain.zip': 'PlatformContent/pc/terrain/',
+    'content-textures3.zip': 'PlatformContent/pc/textures/',
+    'extracontent-luapackages.zip': 'ExtraContent/LuaPackages/',
+    'extracontent-translations.zip': 'ExtraContent/translations/',
+    'extracontent-models.zip': 'ExtraContent/models/',
+    'extracontent-textures.zip': 'ExtraContent/textures/',
+    'extracontent-places.zip': 'ExtraContent/places/',
+  },
+  studio: {
+    'RobloxStudio.zip': '',
+    'RibbonConfig.zip': 'RibbonConfig/',
+    'redist.zip': '',
+    'Libraries.zip': '',
+    'LibrariesQt5.zip': '',
+    'WebView2.zip': '',
+    'WebView2RuntimeInstaller.zip': '',
+    'shaders.zip': 'shaders/',
+    'ssl.zip': 'ssl/',
+    'Qml.zip': 'Qml/',
+    'Plugins.zip': 'Plugins/',
+    'StudioFonts.zip': 'StudioFonts/',
+    'BuiltInPlugins.zip': 'BuiltInPlugins/',
+    'ApplicationConfig.zip': 'ApplicationConfig/',
+    'BuiltInStandalonePlugins.zip': 'BuiltInStandalonePlugins/',
+    'content-qt_translations.zip': 'content/qt_translations/',
+    'content-sky.zip': 'content/sky/',
+    'content-fonts.zip': 'content/fonts/',
+    'content-avatar.zip': 'content/avatar/',
+    'content-models.zip': 'content/models/',
+    'content-sounds.zip': 'content/sounds/',
+    'content-configs.zip': 'content/configs/',
+    'content-api-docs.zip': 'content/api_docs/',
+    'content-textures2.zip': 'content/textures/',
+    'content-studio_svg_textures.zip': 'content/studio_svg_textures/',
+    'content-platform-fonts.zip': 'PlatformContent/pc/fonts/',
+    'content-platform-dictionaries.zip': 'PlatformContent/pc/shared_compression_dictionaries/',
+    'content-terrain.zip': 'PlatformContent/pc/terrain/',
+    'content-textures3.zip': 'PlatformContent/pc/textures/',
+    'extracontent-translations.zip': 'ExtraContent/translations/',
+    'extracontent-luapackages.zip': 'ExtraContent/LuaPackages/',
+    'extracontent-textures.zip': 'ExtraContent/textures/',
+    'extracontent-scripts.zip': 'ExtraContent/scripts/',
+    'extracontent-models.zip': 'ExtraContent/models/',
+    'studiocontent-models.zip': 'StudioContent/models/',
+    'studiocontent-textures.zip': 'StudioContent/textures/',
+  },
+};
+
+const binaryTypeBlobDirs: Record<string, string> = {
+  WindowsPlayer: '/',
+  WindowsStudio64: '/',
+  MacPlayer: '/mac/',
+  MacStudio: '/mac/',
+};
+
+interface RDDPackage {
+  name: string;
+  hash?: string;
+  size?: number;
+  compressedSize?: number;
+}
+
+interface ManifestResponse {
+  version: string;
+  packages: RDDPackage[];
+}
+
 export function useRDD() {
   const [logs, setLogs] = useState<RDDLog[]>([]);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -54,33 +138,26 @@ export function useRDD() {
         : `Mac${config.target === 'studio' ? 'Studio' : 'Player'}`;
 
       addLog('info', `Target: ${binaryType}`);
-
-      // Build paths
-      const hostPath = 'https://setup-aws.rbxcdn.com';
-      const channelPath = config.channel === 'LIVE'
-        ? hostPath
-        : `${hostPath}/channel/${config.channel}`;
-
-      let versionPath = channelPath;
-      const versionParam = config.version
-        ? (config.version.startsWith('version-')
-          ? config.version
-          : `version-${config.version}`)
-        : 'latest';
-
       addLog('info', `Channel: ${config.channel}`);
-      if (config.version) {
-        versionPath = `${channelPath}/${versionParam}`;
-        addLog('info', `Version: ${versionParam}`);
-      } else {
-        addLog('info', 'Version: Latest');
-      }
+      addLog('info', config.version ? `Version: ${config.version}` : 'Version: Latest');
+
+      const blobDir = binaryTypeBlobDirs[binaryType] || '/';
+
+      const manifestResult = await fetchManifest(
+        binaryType,
+        config.channel,
+        blobDir,
+        config.version,
+        config.platform === 'mac',
+        addLog,
+      );
+      addLog('success', `Resolved version ${manifestResult.version}`);
 
       // Download based on platform
       if (config.platform === 'windows') {
-        await downloadWindows(versionPath, binaryType, config, addLog, setProgress, versionParam);
+        await downloadWindows(manifestResult.version, config.channel, binaryType, blobDir, config, manifestResult.packages, addLog, setProgress);
       } else {
-        await downloadMac(versionPath, binaryType, config, addLog);
+        await downloadMac(manifestResult.version, config.channel, binaryType, blobDir, config, addLog);
       }
 
       addLog('success', 'Download complete!');
@@ -101,22 +178,28 @@ export function useRDD() {
   };
 }
 
-async function downloadWindows(
-  versionPath: string,
+async function fetchManifest(
   binaryType: string,
-  config: RDDConfig,
+  channel: string,
+  blobDir: string,
+  version: string | undefined,
+  skipManifest: boolean,
   addLog: (type: RDDLog['type'], message: string) => void,
-  setProgress: (progress: { current: number; total: number }) => void,
-  versionParam: string,
-) {
-  // Fetch manifest
+): Promise<ManifestResponse> {
+  const versionParam = version && version !== 'latest'
+    ? version
+    : 'latest';
+
   addLog('info', 'Fetching manifest from Roblox CDN via proxy...');
   const manifestUrl = `/api/rdd/manifest?${new URLSearchParams({
     platform: binaryType,
-    channel: config.channel,
+    channel,
     version: versionParam,
+    blobDir,
+    skipManifest: skipManifest ? 'true' : 'false',
   }).toString()}`;
   addLog('info', `Manifest URL: ${manifestUrl}`);
+
   const manifestResponse = await fetch(manifestUrl);
 
   if (!manifestResponse.ok) {
@@ -139,34 +222,28 @@ async function downloadWindows(
     throw new Error(`Failed to fetch manifest. ${statusDescription}${detailSuffix}`);
   }
 
-  const manifestClone = manifestResponse.clone();
-  const contentType = manifestResponse.headers.get('content-type') ?? '';
+  const manifestJson = await manifestResponse.json() as ManifestResponse;
 
-  let packages: string[] = [];
-
-  if (contentType.includes('application/json')) {
-    const manifestJson = await manifestResponse.json();
-
-    if (Array.isArray(manifestJson)) {
-      packages = manifestJson.map(pkg => pkg?.toString()).filter(Boolean) as string[];
-    } else if (Array.isArray(manifestJson.packages)) {
-      packages = manifestJson.packages
-        .map((pkg: unknown) => (typeof pkg === 'string' ? pkg : (pkg as { name?: string; packageName?: string })?.name ?? (pkg as { packageName?: string }).packageName ?? ''))
-        .filter((pkg: string) => !!pkg);
-    } else if (Array.isArray(manifestJson.files)) {
-      packages = manifestJson.files
-        .map((pkg: unknown) => (typeof pkg === 'string' ? pkg : (pkg as { name?: string })?.name ?? ''))
-        .filter((pkg: string) => !!pkg);
-    }
+  if (!manifestJson?.version || !Array.isArray(manifestJson.packages)) {
+    throw new Error('Manifest response was missing expected data.');
   }
 
+  return manifestJson;
+}
+
+async function downloadWindows(
+  version: string,
+  channel: string,
+  binaryType: string,
+  blobDir: string,
+  config: RDDConfig,
+  packages: RDDPackage[],
+  addLog: (type: RDDLog['type'], message: string) => void,
+  setProgress: (progress: { current: number; total: number }) => void,
+) {
   if (!packages.length) {
-    const manifestText = await manifestClone.text();
-    addLog('info', 'Manifest returned as text; parsing newline-delimited entries.');
-    packages = manifestText.split('\n');
+    throw new Error('Manifest did not return any packages.');
   }
-
-  packages = packages.map(pkg => pkg.trim()).filter(pkg => pkg && pkg !== 'v0');
 
   addLog('success', `Found ${packages.length} packages`);
   setProgress({ current: 0, total: packages.length });
@@ -174,12 +251,35 @@ async function downloadWindows(
   // Download and extract packages
   const finalZip = new JSZip();
 
+  // Match the extraction layout used by dd.latte.to
+  finalZip.file('AppSettings.xml', `<?xml version="1.0" encoding="UTF-8"?>
+<Settings>
+\t<ContentFolder>content</ContentFolder>
+\t<BaseUrl>http://www.roblox.com</BaseUrl>
+</Settings>
+`);
+
+  const extractionRoots = config.target === 'studio' ? extractRoots.studio : extractRoots.player;
+
+  if (config.target === 'player' && !packages.some(pkg => pkg.name === 'RobloxApp.zip')) {
+    throw new Error('Expected RobloxApp.zip in manifest for WindowsPlayer.');
+  }
+
+  if (config.target === 'studio' && !packages.some(pkg => pkg.name === 'RobloxStudio.zip')) {
+    throw new Error('Expected RobloxStudio.zip in manifest for WindowsStudio64.');
+  }
+
   for (let i = 0; i < packages.length; i++) {
-    const packageName = packages[i].trim();
+    const packageName = packages[i].name.trim();
     if (!packageName) continue;
 
     addLog('progress', `Downloading ${packageName}...`);
-    const packageUrl = `${versionPath}-${packageName}`;
+    const packageUrl = `/api/rdd/package?${new URLSearchParams({
+      channel,
+      version,
+      file: packageName,
+      blobDir,
+    }).toString()}`;
 
     try {
       const packageResponse = await fetch(packageUrl);
@@ -189,14 +289,31 @@ async function downloadWindows(
 
       const packageData = await packageResponse.arrayBuffer();
 
-      addLog('progress', `Extracting ${packageName}...`);
-      const packageZip = await JSZip.loadAsync(packageData);
+      // Some manifest entries (e.g., RobloxPlayerInstaller.exe) are not ZIPs. Add them directly.
+      const isZip = packageName.toLowerCase().endsWith('.zip');
 
-      // Extract files to final ZIP
-      for (const [filename, file] of Object.entries(packageZip.files)) {
-        if (!file.dir) {
-          const content = await file.async('arraybuffer');
-          finalZip.file(filename, content);
+      const targetRoot = extractionRoots[packageName];
+
+      if (!isZip) {
+        const destination = targetRoot ? `${targetRoot}${packageName}` : packageName;
+        addLog('progress', `Adding ${packageName} to bundle...`);
+        finalZip.file(destination, packageData);
+      } else {
+        addLog('progress', `Extracting ${packageName}...`);
+        const packageZip = await JSZip.loadAsync(packageData);
+
+        // Extract files to final ZIP using the expected root mapping
+        for (const [filename, file] of Object.entries(packageZip.files)) {
+          if (!file.dir) {
+            const content = await file.async('arraybuffer');
+            const normalizedPath = filename.replace(/\\/g, '/');
+            const destination = targetRoot ? `${targetRoot}${normalizedPath}` : normalizedPath;
+            finalZip.file(destination, content);
+          }
+        }
+
+        if (!targetRoot) {
+          addLog('info', `Package ${packageName} not mapped; kept original paths.`);
         }
       }
 
@@ -211,6 +328,7 @@ async function downloadWindows(
 
   // Generate final ZIP
   addLog('info', 'Assembling final deployment...');
+  const outputFileName = `${channel}-${binaryType}-${version}.zip`;
   const finalBlob = await finalZip.generateAsync({
     type: 'blob',
     compression: config.compress ? 'DEFLATE' : 'STORE',
@@ -225,7 +343,7 @@ async function downloadWindows(
   const url = URL.createObjectURL(finalBlob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `roblox-${binaryType}-${Date.now()}.zip`;
+  a.download = outputFileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -235,14 +353,21 @@ async function downloadWindows(
 }
 
 async function downloadMac(
-  versionPath: string,
+  version: string,
+  channel: string,
   binaryType: string,
+  blobDir: string,
   config: RDDConfig,
   addLog: (type: RDDLog['type'], message: string) => void
 ) {
   // Mac is a single ZIP download
   const filename = binaryType === 'MacStudio' ? 'RobloxStudioApp.zip' : 'RobloxPlayer.zip';
-  const url = `${versionPath}-${filename}`;
+  const url = `/api/rdd/package?${new URLSearchParams({
+    channel,
+    version,
+    file: filename,
+    blobDir,
+  }).toString()}`;
 
   addLog('info', `Downloading ${filename}...`);
 
@@ -257,10 +382,11 @@ async function downloadMac(
     addLog('success', 'Download complete!');
 
     // Trigger download
+    const outputFileName = `${channel}-${binaryType}-${version}.zip`;
     const downloadUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = downloadUrl;
-    a.download = `roblox-${binaryType}-${Date.now()}.zip`;
+    a.download = outputFileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
