@@ -261,25 +261,33 @@ export function createSuccessResponse(
 
 /**
  * Log admin action to audit log
- * TODO: Implement database logging
  * @param action - Action details
  */
 export async function logAdminAction(action: {
   action: string;
   userId: string;
   executorId?: string;
+  targetId?: string;
   details?: Record<string, unknown>;
   changes?: Record<string, unknown>;
+  ipAddress?: string;
+  userAgent?: string;
 }): Promise<void> {
-  // TODO: Save to database
-  const logEntry = {
-    ...action,
-    timestamp: new Date().toISOString(),
-    ip: "unknown", // Extract from request if needed
-  };
+  const { logAdminAction: logToDb } = await import("@/lib/db/admin-actions");
 
-  console.log("[ADMIN ACTION]", JSON.stringify(logEntry, null, 2));
+  await logToDb({
+    action: action.action,
+    userId: action.userId,
+    executorId: action.executorId,
+    targetId: action.targetId,
+    details: action.details,
+    changes: action.changes,
+    ipAddress: action.ipAddress,
+    userAgent: action.userAgent,
+  });
 
-  // In production:
-  // await db.adminActions.create(logEntry);
+  // Also log to console in development
+  if (process.env.NODE_ENV === "development") {
+    console.log("[ADMIN ACTION]", JSON.stringify(action, null, 2));
+  }
 }

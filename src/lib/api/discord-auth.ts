@@ -6,35 +6,18 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, addRateLimitHeaders } from "./rate-limit";
+import { validateApiKey, updateApiKeyLastUsed, findApiKeyByKey } from "@/lib/db/api-keys";
 
 export interface AuthResult {
   authenticated: boolean;
   apiKey?: string;
+  apiKeyId?: string;
   error?: string;
   rateLimitResult?: {
     allowed: boolean;
     remaining: number;
     resetAt: number;
   };
-}
-
-/**
- * Valid API keys stored in environment variables
- * In production, this should be stored in a database with hashing
- */
-function getValidApiKeys(): Set<string> {
-  const keys = new Set<string>();
-
-  // Load API keys from environment variables
-  const key1 = process.env.DISCORD_BOT_API_KEY_1;
-  const key2 = process.env.DISCORD_BOT_API_KEY_2;
-  const key3 = process.env.DISCORD_BOT_API_KEY_3;
-
-  if (key1) keys.add(key1);
-  if (key2) keys.add(key2);
-  if (key3) keys.add(key3);
-
-  return keys;
 }
 
 /**
@@ -72,28 +55,30 @@ export async function authenticateDiscordBot(
     };
   }
 
-  // Validate API key
-  const validApiKeys = getValidApiKeys();
+  // Validate API key against database
+  const isValid = await validateApiKey(apiKey);
 
-  if (validApiKeys.size === 0) {
-    console.error("No Discord Bot API keys configured!");
+  if (!isValid) {
     return {
       authenticated: false,
-      error: "API authentication not configured",
+      error: "Invalid or expired API key",
     };
   }
 
-  if (!validApiKeys.has(apiKey)) {
+  // Get API key details from database
+  const apiKeyRecord = await findApiKeyByKey(apiKey);
+
+  if (!apiKeyRecord) {
     return {
       authenticated: false,
-      error: "Invalid API key",
+      error: "API key not found",
     };
   }
 
-  // Check rate limit
+  // Check rate limit using the key's configured limits
   const rateLimitResult = await rateLimit(apiKey, {
-    limit: 100, // 100 requests
-    window: 60 * 1000, // per minute
+    limit: apiKeyRecord.rateLimit,
+    window: apiKeyRecord.rateLimitWindow,
   });
 
   if (!rateLimitResult.allowed) {
@@ -104,9 +89,15 @@ export async function authenticateDiscordBot(
     };
   }
 
+  // Update last used timestamp (async, don't wait)
+  updateApiKeyLastUsed(apiKey).catch((err) => {
+    console.error("Failed to update API key last used:", err);
+  });
+
   return {
     authenticated: true,
     apiKey,
+    apiKeyId: apiKeyRecord.id,
     rateLimitResult,
   };
 }
