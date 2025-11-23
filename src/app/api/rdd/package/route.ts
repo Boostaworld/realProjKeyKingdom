@@ -2,8 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 
 function buildCdnBase(channel: string) {
   return channel === 'LIVE'
-    ? 'https://setup.rbxcdn.com'
-    : `https://setup.rbxcdn.com/channel/${channel}`;
+    ? 'https://setup-aws.rbxcdn.com'
+    : `https://setup-aws.rbxcdn.com/channel/${channel}`;
+}
+
+function normalizeBlobDir(blobDirParam: string | null) {
+  if (!blobDirParam) return '/';
+
+  let blobDir = blobDirParam;
+  if (!blobDir.startsWith('/')) {
+    blobDir = `/${blobDir}`;
+  }
+
+  if (!blobDir.endsWith('/')) {
+    blobDir = `${blobDir}/`;
+  }
+
+  return blobDir;
 }
 
 export async function GET(request: NextRequest) {
@@ -11,6 +26,7 @@ export async function GET(request: NextRequest) {
   const version = searchParams.get('version');
   const channel = searchParams.get('channel') || 'LIVE';
   const file = searchParams.get('file');
+  const blobDir = normalizeBlobDir(searchParams.get('blobDir'));
 
   if (!version || !file) {
     return NextResponse.json(
@@ -20,7 +36,7 @@ export async function GET(request: NextRequest) {
   }
 
   const cdnBase = buildCdnBase(channel);
-  const packageUrl = `${cdnBase}/${version}-${file}`;
+  const packageUrl = `${cdnBase}${blobDir}${version}-${file}`;
 
   try {
     const response = await fetch(packageUrl);

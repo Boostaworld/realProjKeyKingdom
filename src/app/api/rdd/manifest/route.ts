@@ -65,27 +65,66 @@ function parseManifest(manifestText: string): ManifestPackage[] {
   return packages;
 }
 
+function normalizeBlobDir(blobDirParam: string | null) {
+  if (!blobDirParam) return '/';
+
+  let blobDir = blobDirParam;
+  if (!blobDir.startsWith('/')) {
+    blobDir = `/${blobDir}`;
+  }
+
+  if (!blobDir.endsWith('/')) {
+    blobDir = `${blobDir}/`;
+  }
+
+  return blobDir;
+}
+
+async function fetchManifestText(manifestUrl: string, fallbackUrl?: string) {
+  const response = await fetch(manifestUrl);
+
+  if (response.ok) {
+    return response.text();
+  }
+
+  if (fallbackUrl) {
+    const fallbackResponse = await fetch(fallbackUrl);
+
+    if (fallbackResponse.ok) {
+      return fallbackResponse.text();
+    }
+
+    throw new Error(`Roblox CDN returned ${fallbackResponse.status} (fallback) and ${response.status}`);
+  }
+
+  throw new Error(`Roblox CDN returned ${response.status}`);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const platform = searchParams.get('platform') || 'WindowsPlayer';
     const channel = searchParams.get('channel') || 'LIVE';
     const version = searchParams.get('version') || 'latest';
+    const blobDir = normalizeBlobDir(searchParams.get('blobDir'));
+    const skipManifest = searchParams.get('skipManifest') === 'true';
 
     const resolvedVersion = await resolveVersion(platform, channel, version);
 
-    const baseUrl = channel === 'LIVE'
-      ? 'https://setup.rbxcdn.com'
-      : `https://setup.rbxcdn.com/channel/${channel}`;
-
-    const manifestUrl = `${baseUrl}/${resolvedVersion}-rbxPkgManifest.txt`;
-    const response = await fetch(manifestUrl);
-
-    if (!response.ok) {
-      throw new Error(`Roblox CDN returned ${response.status}`);
+    if (skipManifest) {
+      return NextResponse.json({ version: resolvedVersion, packages: [] });
     }
 
-    const manifestText = await response.text();
+    const cdnBase = channel === 'LIVE'
+      ? 'https://setup-aws.rbxcdn.com'
+      : `https://setup-aws.rbxcdn.com/channel/${channel}`;
+
+    const manifestUrl = `${cdnBase}${blobDir}${resolvedVersion}-rbxPkgManifest.txt`;
+    const fallbackUrl = channel !== 'LIVE'
+      ? `https://setup-aws.rbxcdn.com/channel/common${blobDir}${resolvedVersion}-rbxPkgManifest.txt`
+      : undefined;
+
+    const manifestText = await fetchManifestText(manifestUrl, fallbackUrl);
     const packages = parseManifest(manifestText);
 
     return NextResponse.json({
