@@ -4,8 +4,8 @@ import executorsData from "@/data/executors.json";
 
 export async function GET() {
   try {
-    // Transform JSON dates to Date objects
-    const executors: Executor[] = executorsData.map((executor) => ({
+    // Transform JSON dates to Date objects and cast to proper types
+    const executors = executorsData.map((executor) => ({
       ...executor,
       status: {
         ...executor.status,
@@ -13,7 +13,7 @@ export async function GET() {
       },
       createdAt: new Date(executor.createdAt),
       updatedAt: new Date(executor.updatedAt),
-    }));
+    })) as Executor[];
 
     return NextResponse.json(executors);
   } catch (error) {

@@ -20,9 +20,10 @@ function getTtlForPath(path: string): number {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const path = params.path.join("/");
+  const { path: pathArray } = await params;
+  const path = pathArray.join("/");
   const url = `${UPSTREAM_BASE}/${path}`;
   const ttl = getTtlForPath(path);
 
