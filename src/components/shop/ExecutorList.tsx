@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import { useExecutors } from "@/lib/hooks/useExecutors";
-import { ExecutorRow } from "./ExecutorRow";
+import { ExecutorTable } from "./ExecutorTable";
+import { ExecutorCard } from "./ExecutorCard";
 
-export function ExecutorTable() {
+export function ExecutorList() {
   const { data: executors, isLoading, isError } = useExecutors();
 
   if (isLoading) {
@@ -49,35 +50,18 @@ export function ExecutorTable() {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-background-elevated bg-background-surface">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-background-elevated bg-background-elevated/40">
-            <th className="px-4 py-3 text-left text-sm font-semibold text-text-secondary" colSpan={8}>
-              <div className="grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 items-center">
-                <div>Executor</div>
-                <div>
-                  sUNC
-                  <span className="ml-1 text-[10px] uppercase text-text-muted">
-                    (sorted)
-                  </span>
-                </div>
-                <div>Status</div>
-                <div>Platform</div>
-                <div>Category</div>
-                <div>Rating</div>
-                <div>Price</div>
-                <div className="text-right">Actions</div>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {executors.map((executor, index) => (
-            <ExecutorRow key={executor.id} executor={executor} index={index} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {/* Desktop Table View (hidden on mobile) */}
+      <div className="hidden md:block">
+        <ExecutorTable />
+      </div>
+
+      {/* Mobile Card View (hidden on desktop) */}
+      <div className="md:hidden space-y-4">
+        {executors.map((executor, index) => (
+          <ExecutorCard key={executor.id} executor={executor} index={index} />
+        ))}
+      </div>
+    </>
   );
 }
