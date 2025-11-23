@@ -1,0 +1,296 @@
+// Prisma Schema for Key-Kingdom
+// Database: SQLite (development) → PostgreSQL (production)
+// ORM: Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ============================================
+// API Authentication
+// ============================================
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  key         String   @unique // The actual API key (hashed in production)
+  keyHash     String?  // SHA256 hash of the key for validation
+  name        String?  // Optional friendly name
+  type        String   @default("discord_bot") // discord_bot, vendor, internal
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+  expiresAt   DateTime? // Optional expiration
+  revoked     Boolean  @default(false)
+  revokedAt   DateTime?
+  revokedBy   String?
+
+  // Rate limiting
+  rateLimit   Int      @default(100) // Requests per window
+  rateLimitWindow Int  @default(60000) // Window in ms (default: 1 minute)
+
+  // Usage stats
+  totalRequests Int   @default(0)
+
+  // Relations
+  userId      String?  // Optional: link to user account (future)
+
+  @@index([key])
+  @@index([userId])
+  @@map("api_keys")
+}
+
+// ============================================
+// Admin Actions (Audit Log)
+// ============================================
+
+model AdminAction {
+  id          String   @id @default(uuid())
+  action      String   // e.g., "executor.created", "executor.updated"
+  userId      String   // Admin user ID
+
+  // Context
+  executorId  String?  // Related executor (if applicable)
+  targetId    String?  // Generic target ID for other resources
+
+  // Details
+  details     String?  // JSON string with action details
+  changes     String?  // JSON string with before/after changes
+
+  // Metadata
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([executorId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("admin_actions")
+}
+
+// ============================================
+// Executor Status Overrides
+// ============================================
+
+model ExecutorOverride {
+  id          String   @id @default(uuid())
+  executorId  String   // Executor being overridden
+
+  // Override data
+  working     Boolean  // Forced working status
+  reason      String   // Why was this overridden?
+
+  // Expiration
+  expiresAt   DateTime? // When override expires (returns to WEAO data)
+
+  // Metadata
+  createdBy   String   // Admin who created override
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  active      Boolean  @default(true)
+
+  // Notification
+  notifiedWebhooks Boolean @default(false)
+
+  @@index([executorId])
+  @@index([active])
+  @@index([expiresAt])
+  @@map("executor_overrides")
+}
+
+// ============================================
+// Executor Change History
+// ============================================
+
+model ExecutorHistory {
+  id          String   @id @default(uuid())
+  executorId  String   // Executor being tracked
+
+  // Action
+  action      String   // created, updated, deleted, status_changed
+  userId      String?  // Who made the change (admin/vendor)
+
+  // Changes
+  changes     String   // JSON string with field changes
+  previousData String? // JSON string with data before change
+  newData     String?  // JSON string with data after change
+
+  // Metadata
+  timestamp   DateTime @default(now())
+  source      String   @default("admin") // admin, vendor, weao, system
+
+  @@index([executorId])
+  @@index([timestamp])
+  @@index([action])
+  @@map("executor_history")
+}
+
+// ============================================
+// Webhooks
+// ============================================
+
+model Webhook {
+  id          String   @id @default(uuid())
+
+  // Subscription
+  url         String   // Webhook delivery URL
+  events      String   // JSON array of event types to receive
+  secret      String?  // Secret for signing payloads
+
+  // Authentication
+  apiKeyId    String?  // Link to API key that created this
+
+  // Status
+  active      Boolean  @default(true)
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastTriggeredAt DateTime?
+
+  // Stats
+  totalDeliveries Int   @default(0)
+  failedDeliveries Int  @default(0)
+  successfulDeliveries Int @default(0)
+
+  // Relations
+  deliveries  WebhookDelivery[]
+
+  @@index([apiKeyId])
+  @@index([active])
+  @@map("webhooks")
+}
+
+// ============================================
+// Webhook Deliveries
+// ============================================
+
+model WebhookDelivery {
+  id          String   @id @default(uuid())
+  webhookId   String   // Link to webhook
+
+  // Event
+  eventType   String   // e.g., "executor.status_changed"
+  payload     String   // JSON string with event data
+
+  // Delivery
+  deliveredAt DateTime?
+  responseStatus Int?  // HTTP status code
+  responseBody String? // Response from webhook URL
+
+  // Retry
+  retries     Int      @default(0)
+  nextRetryAt DateTime?
+  maxRetries  Int      @default(3)
+
+  // Status
+  status      String   @default("pending") // pending, delivered, failed
+
+  // Metadata
+  createdAt   DateTime @default(now())
+
+  // Relations
+  webhook     Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+// ============================================
+// FUTURE: User Accounts (Phase 3+)
+// ============================================
+// Uncomment when implementing user authentication
+
+// model User {
+//   id          String   @id @default(uuid())
+//   email       String   @unique
+//   passwordHash String
+//
+//   // Profile
+//   name        String?
+//   avatar      String?
+//
+//   // Role
+//   role        String   @default("user") // user, vendor, admin
+//
+//   // Vendor specific
+//   vendorName  String?  // Display name for vendor
+//   verified    Boolean  @default(false)
+//
+//   // Metadata
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//   lastLoginAt DateTime?
+//
+//   // Relations
+//   apiKeys     ApiKey[]
+//   reviews     Review[]
+//
+//   @@index([email])
+//   @@index([role])
+//   @@map("users")
+// }
+
+// ============================================
+// FUTURE: Reviews (Phase 2+)
+// ============================================
+// Uncomment when implementing review system
+
+// model Review {
+//   id          String   @id @default(uuid())
+//   executorId  String   // Executor being reviewed
+//   userId      String   // User who wrote review
+//
+//   // Review content
+//   rating      Int      // 1-5 stars
+//   title       String?
+//   content     String?  // Optional text review (50-500 chars)
+//
+//   // Verification
+//   verified    Boolean  @default(false) // Verified purchase badge
+//
+//   // Moderation
+//   flagged     Boolean  @default(false)
+//   hidden      Boolean  @default(false)
+//   moderatorNote String?
+//
+//   // Engagement
+//   helpfulCount Int     @default(0)
+//   unhelpfulCount Int   @default(0)
+//
+//   // Metadata
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//
+//   // Relations
+//   user        User     @relation(fields: [userId], references: [id])
+//   votes       ReviewVote[]
+//
+//   @@index([executorId])
+//   @@index([userId])
+//   @@index([rating])
+//   @@index([createdAt])
+//   @@map("reviews")
+// }
+
+// model ReviewVote {
+//   id          String   @id @default(uuid())
+//   reviewId    String
+//   userId      String
+//   helpful     Boolean  // true = helpful, false = unhelpful
+//
+//   createdAt   DateTime @default(now())
+//
+//   review      Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+//
+//   @@unique([reviewId, userId]) // One vote per user per review
+//   @@map("review_votes")
+// }
