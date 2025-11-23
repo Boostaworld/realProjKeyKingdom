@@ -62,19 +62,23 @@ export function useRDD() {
         : `${hostPath}/channel/${config.channel}`;
 
       let versionPath = channelPath;
-      if (config.version) {
-        const version = config.version.startsWith('version-')
+      const versionParam = config.version
+        ? (config.version.startsWith('version-')
           ? config.version
-          : `version-${config.version}`;
-        versionPath = `${channelPath}/${version}`;
-        addLog('info', `Version: ${version}`);
+          : `version-${config.version}`)
+        : 'latest';
+
+      addLog('info', `Channel: ${config.channel}`);
+      if (config.version) {
+        versionPath = `${channelPath}/${versionParam}`;
+        addLog('info', `Version: ${versionParam}`);
       } else {
         addLog('info', 'Version: Latest');
       }
 
       // Download based on platform
       if (config.platform === 'windows') {
-        await downloadWindows(versionPath, binaryType, config, addLog, setProgress);
+        await downloadWindows(versionPath, binaryType, config, addLog, setProgress, versionParam);
       } else {
         await downloadMac(versionPath, binaryType, config, addLog);
       }
@@ -102,19 +106,51 @@ async function downloadWindows(
   binaryType: string,
   config: RDDConfig,
   addLog: (type: RDDLog['type'], message: string) => void,
-  setProgress: (progress: { current: number; total: number }) => void
+  setProgress: (progress: { current: number; total: number }) => void,
+  versionParam: string,
 ) {
   // Fetch manifest
-  addLog('info', 'Fetching manifest from Roblox CDN...');
-  const manifestUrl = `${versionPath}-rbxPkgManifest.txt`;
+  addLog('info', 'Fetching manifest from Roblox CDN via proxy...');
+  const manifestUrl = `/api/rdd/manifest?${new URLSearchParams({
+    platform: binaryType,
+    channel: config.channel,
+    version: versionParam,
+  }).toString()}`;
+  addLog('info', `Manifest URL: ${manifestUrl}`);
   const manifestResponse = await fetch(manifestUrl);
 
   if (!manifestResponse.ok) {
     throw new Error('Failed to fetch manifest. Version may not exist or network error occurred.');
   }
 
-  const manifestText = await manifestResponse.text();
-  const packages = manifestText.split('\n').filter(p => p.trim() && p.trim() !== 'v0');
+  const manifestClone = manifestResponse.clone();
+  const contentType = manifestResponse.headers.get('content-type') ?? '';
+
+  let packages: string[] = [];
+
+  if (contentType.includes('application/json')) {
+    const manifestJson = await manifestResponse.json();
+
+    if (Array.isArray(manifestJson)) {
+      packages = manifestJson.map(pkg => pkg?.toString()).filter(Boolean) as string[];
+    } else if (Array.isArray(manifestJson.packages)) {
+      packages = manifestJson.packages
+        .map((pkg: unknown) => (typeof pkg === 'string' ? pkg : (pkg as { name?: string; packageName?: string })?.name ?? (pkg as { packageName?: string }).packageName ?? ''))
+        .filter((pkg: string) => !!pkg);
+    } else if (Array.isArray(manifestJson.files)) {
+      packages = manifestJson.files
+        .map((pkg: unknown) => (typeof pkg === 'string' ? pkg : (pkg as { name?: string })?.name ?? ''))
+        .filter((pkg: string) => !!pkg);
+    }
+  }
+
+  if (!packages.length) {
+    const manifestText = await manifestClone.text();
+    addLog('info', 'Manifest returned as text; parsing newline-delimited entries.');
+    packages = manifestText.split('\n');
+  }
+
+  packages = packages.map(pkg => pkg.trim()).filter(pkg => pkg && pkg !== 'v0');
 
   addLog('success', `Found ${packages.length} packages`);
   setProgress({ current: 0, total: packages.length });
