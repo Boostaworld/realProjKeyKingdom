@@ -38,20 +38,17 @@ export function RDDConfig({
         <div className="space-y-2">
           <label className="text-sm font-medium text-text-primary">Binary Type</label>
           <select
-            value={`${config.platform}-${config.target}`}
-            onChange={(e) => {
-              const [platform, target] = e.target.value.split('-') as ['windows' | 'mac', 'player' | 'studio'];
-              onChange({ ...config, platform, target });
-            }}
+            value={config.binaryType}
+            onChange={(e) => onChange({ ...config, binaryType: e.target.value as any })}
             className="w-full h-11 px-4 rounded-lg border border-white/10 bg-background-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-colors backdrop-blur-sm"
             style={{
               background: 'linear-gradient(135deg, rgba(21, 26, 33, 0.7) 0%, rgba(30, 35, 41, 0.7) 100%)',
             }}
           >
-            <option value="windows-player">WindowsPlayer</option>
-            <option value="windows-studio">WindowsStudio64</option>
-            <option value="mac-player">MacPlayer</option>
-            <option value="mac-studio">MacStudio</option>
+            <option value="WindowsPlayer">WindowsPlayer</option>
+            <option value="WindowsStudio64">WindowsStudio64</option>
+            <option value="MacPlayer">MacPlayer</option>
+            <option value="MacStudio">MacStudio</option>
           </select>
           <div className="text-xs text-text-muted px-1">
             Select the Roblox binary type to download
