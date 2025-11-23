@@ -6,9 +6,9 @@
 
 ## Implementation Status
 
-✅ **COMPLETED** - RDD is fully functional and returns ZIP files as expected.
+✅ **COMPLETED & ENHANCED** - RDD is fully functional with advanced controls matching inject.today/rdd.
 
-**Last Updated:** 2025-11-23
+**Last Updated:** 2025-11-23 (Enhanced with compression level control, binary type dropdown, and improved UI)
 
 ---
 
@@ -35,10 +35,12 @@ Key-Kingdom's RDD implementation is **fully functional** and correctly downloads
    - Fetches manifest from `/api/rdd/manifest`
    - Downloads packages via `/api/rdd/package`
    - Uses JSZip to extract and assemble packages client-side
+   - **NEW**: Configurable compression level (1-9 scale) for optimal performance/size balance
    - Outputs ZIP file: `${channel}-${binaryType}-${version}.zip`
 
 2. **Manifest API** (`src/app/api/rdd/manifest/route.ts`):
    - Resolves version from Roblox clientsettings (v2 with v1 fallback)
+   - Integrates with WEAO fallback mechanism for reliability
    - Fetches `rbxPkgManifest.txt` from Roblox CDN
    - Parses manifest and returns package list
    - Handles channel-specific paths and fallbacks
@@ -47,12 +49,18 @@ Key-Kingdom's RDD implementation is **fully functional** and correctly downloads
    - Proxies individual package downloads from Roblox CDN
    - Handles both ZIP packages and non-ZIP files (like installers)
    - Sets appropriate headers for download
+   - No server-side assembly - all processing happens client-side
 
 4. **UI Components** (`src/components/rdd/*`):
-   - `RDDConfig.tsx` - Configuration panel with platform/channel/version selection
-   - `VersionSelect.tsx` - Version selection (latest vs specific)
-   - `RDDTerminal.tsx` - Terminal-style log output
-   - `ProgressBar.tsx` - Visual progress indicator
+   - `RDDConfig.tsx` - Configuration panel with **enhanced controls**:
+     - Binary type dropdown (WindowsPlayer, WindowsStudio64, MacPlayer, MacStudio)
+     - Channel selector (LIVE, Beta)
+     - Version mode toggle (Latest vs Manual)
+     - Compression toggle with level slider (1-9)
+   - `VersionSelect.tsx` - Version mode selection with WEAO integration
+   - `RDDTerminal.tsx` - Terminal-style log output with copy/clear functions
+   - `ProgressBar.tsx` - Animated progress indicator
+   - `LogLine.tsx` - Colored log messages with timestamps
 
 ### Output Format
 
@@ -78,13 +86,30 @@ The RDD tool produces ZIP files with the following naming convention:
 
 ### Version Resolution
 
-**Priority order:**
-1. Explicit version provided by user → Use as-is
-2. "Latest" requested → Try clientsettings v2 API
-3. v2 fails → Fall back to clientsettings v1 API
-4. Both fail → Return error
+**New Enhanced Flow:**
+1. **Latest Version Mode** (versionMode: 'latest'):
+   - Automatically resolves latest version via `/api/rdd/manifest`
+   - Uses clientsettings v2 API (with v1 fallback)
+   - Falls back to WEAO proxy if Roblox APIs fail
+   - Displays resolved version in terminal logs
+
+2. **Manual Version Mode** (versionMode: 'manual'):
+   - User provides exact version hash
+   - Accepts with or without "version-" prefix
+   - No API calls needed - uses version as-is
 
 See `docs/WEAO_FALLBACK.md` for detailed fallback logic.
+
+### Compression Control
+
+**New Feature:**
+- Toggle compression on/off
+- Compression levels 1-9:
+  - **1-3**: Fast compression, larger files (ideal for quick tests)
+  - **4-6**: Balanced (default: 6)
+  - **7-9**: Maximum compression, slower processing (ideal for distribution)
+- Level displayed in terminal logs
+- Compression only affects final ZIP generation, not individual packages
 
 ---
 
@@ -97,18 +122,36 @@ See `docs/WEAO_FALLBACK.md` for detailed fallback logic.
 - **Official host**: https://rdd.latte.to
 - **GitHub**: https://github.com/latte-soft/rdd
 
-### Key Features
-- Download any Roblox version (current or historical)
-- Support for Windows Player/Studio and Mac Player/Studio
-- Rollback to previous versions
-- Real-time progress tracking
-- Terminal-style logging
+### Key-Kingdom's Implementation
+**Matches and enhances inject.today/rdd:**
+- ✅ Binary type dropdown (WindowsPlayer, WindowsStudio64, MacPlayer, MacStudio)
+- ✅ Channel selector (LIVE, Beta)
+- ✅ Version mode toggle (Latest with auto-resolution vs Manual input)
+- ✅ **NEW**: Compression level control (1-9 slider)
+- ✅ Real-time progress tracking with animated bar
+- ✅ Terminal-style logging with copy/clear functions
+- ✅ Dark glassmorphic UI matching Key-Kingdom design system
+- ✅ Mobile-responsive layout
 
-### inject.today Implementation
-- Polished UI wrapper around RDD core logic
-- Dropdowns for platform, channel, target, version
-- Progress bar and collapsible terminal
-- Dark-themed interface matching their brand
+### Usage Instructions
+
+**To download a Roblox binary:**
+
+1. **Select Binary Type**: Choose from WindowsPlayer, WindowsStudio64, MacPlayer, or MacStudio
+2. **Select Channel**: Choose LIVE (production) or Beta
+3. **Choose Version Mode**:
+   - **Latest Version**: Auto-resolves the current version from Roblox CDN
+   - **Manual Version**: Enter a specific version hash (e.g., `version-e380c8edc8f6477c`)
+4. **Configure Compression** (optional):
+   - Toggle compression on/off
+   - Adjust compression level (1=fastest, 9=best compression)
+   - Default: Level 6 (balanced)
+5. **Click Download**: Terminal will show real-time progress
+6. **Wait for Completion**: ZIP file will download automatically
+
+**Expected Output:**
+- File name: `{channel}-{binaryType}-{version}.zip`
+- Example: `LIVE-WindowsPlayer-version-e380c8edc8f6477c.zip`
 
 ---
 
@@ -1031,6 +1074,78 @@ worker.onmessage = (e) => {
 
 ---
 
-**Last Updated**: Based on ChatGPT RDD analysis (Nov 2024)  
-**Status**: Ready for implementation  
-**Version**: 1.0
+## Troubleshooting
+
+### Slow "Assembling" Step
+
+**Issue**: The assembling step shows 1% per minute or is very slow.
+
+**Solutions**:
+1. **Lower compression level**: Try levels 1-3 for faster processing
+2. **Disable compression**: Turn off compression entirely for maximum speed
+3. **Browser memory**: Close other tabs to free up browser memory
+4. **File size**: Windows Studio downloads are large (2-3GB) and take longer
+
+**Technical explanation**: JSZip's `generateAsync` with high compression levels (7-9) is CPU-intensive. Lower levels significantly improve speed with minimal size impact.
+
+### Getting Bootstrapper .exe Instead of ZIP
+
+**Issue**: Download returns a `.exe` file instead of a `.zip`.
+
+**Solutions**:
+1. **Check binary type**: Ensure you selected the correct binary type from the dropdown
+2. **Check browser**: Some browsers may misidentify the file type
+3. **Check file extension**: Rename the file to `.zip` if it's actually a ZIP with wrong extension
+
+**Note**: The current implementation ALWAYS outputs ZIP files. If you're seeing a bare `.exe`, it's likely a browser download issue, not a code issue.
+
+### Version Resolution Fails
+
+**Issue**: "Failed to resolve latest version" error.
+
+**Solutions**:
+1. **Check WEAO status**: WEAO may be down temporarily
+2. **Use manual mode**: Switch to "Manual Version" and enter a specific version hash
+3. **Check network**: Ensure you have internet connectivity
+4. **Try fallback**: The system automatically falls back to Roblox clientsettings API
+
+**Technical**: The system tries WEAO → clientsettings v2 → clientsettings v1 in sequence.
+
+### WEAO 502 Errors
+
+**Issue**: Seeing `WEAO proxy returned 502` in logs.
+
+**Status**: This is logged but **non-fatal**. The system automatically:
+1. Falls back to Roblox clientsettings API
+2. Returns valid version data
+3. Continues download normally
+
+**No action needed** - this is expected behavior when WEAO is temporarily unavailable.
+
+---
+
+## Recent Changes (2025-11-23)
+
+### Added
+- ✅ **Compression Level Control**: 1-9 slider for balancing speed vs size
+- ✅ **Binary Type Dropdown**: Cleaner single dropdown replacing platform + target buttons
+- ✅ **Version Mode Toggle**: Clear separation between "Latest" and "Manual" modes
+- ✅ **Improved UI Spacing**: Better padding, alignment, and visual hierarchy
+- ✅ **Enhanced Terminal**: Better log colors, timestamps, and copy/clear functions
+
+### Fixed
+- ✅ **WEAO Integration**: Properly integrated with fallback mechanism
+- ✅ **Compression Speed**: User can now choose faster compression levels
+- ✅ **UI Consistency**: Matches Key-Kingdom glassmorphic design system
+
+### Technical Improvements
+- Updated `RDDConfig` interface to include `versionMode` and `compressionLevel`
+- Refactored `VersionSelect` component to handle mode changes
+- Enhanced terminal logging to show compression level
+- Improved type safety across all RDD components
+
+---
+
+**Last Updated**: 2025-11-23 (Full enhancement with inject.today/rdd parity)
+**Status**: Production-ready with advanced controls
+**Version**: 2.0

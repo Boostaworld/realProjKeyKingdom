@@ -6,7 +6,9 @@ export interface RDDConfig {
   target: 'player' | 'studio';
   channel: string;
   version?: string;
+  versionMode: 'latest' | 'manual';
   compress: boolean;
+  compressionLevel: number; // 1-9, where 9 is maximum compression
 }
 
 export interface RDDLog {
@@ -329,10 +331,14 @@ async function downloadWindows(
   // Generate final ZIP
   addLog('info', 'Assembling final deployment...');
   const outputFileName = `${channel}-${binaryType}-${version}.zip`;
+
+  const compressionLevel = config.compress ? config.compressionLevel : 0;
+  addLog('info', `Using compression level: ${compressionLevel}`);
+
   const finalBlob = await finalZip.generateAsync({
     type: 'blob',
     compression: config.compress ? 'DEFLATE' : 'STORE',
-    compressionOptions: { level: 6 },
+    compressionOptions: { level: compressionLevel },
   }, (metadata) => {
     if (metadata.percent) {
       addLog('progress', `Assembling: ${Math.round(metadata.percent)}%`);
