@@ -120,7 +120,23 @@ async function downloadWindows(
   const manifestResponse = await fetch(manifestUrl);
 
   if (!manifestResponse.ok) {
-    throw new Error('Failed to fetch manifest. Version may not exist or network error occurred.');
+    let errorDetail = '';
+    try {
+      const errorJson = await manifestResponse.clone().json();
+      errorDetail = (errorJson as { error?: string; detail?: string })?.detail
+        || (errorJson as { error?: string; detail?: string })?.error
+        || '';
+    } catch {
+      try {
+        errorDetail = (await manifestResponse.clone().text()).trim();
+      } catch {
+        errorDetail = '';
+      }
+    }
+
+    const statusDescription = manifestResponse.statusText || `Status ${manifestResponse.status}`;
+    const detailSuffix = errorDetail ? ` - ${errorDetail}` : '';
+    throw new Error(`Failed to fetch manifest. ${statusDescription}${detailSuffix}`);
   }
 
   const manifestClone = manifestResponse.clone();
