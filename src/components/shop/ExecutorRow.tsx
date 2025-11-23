@@ -42,14 +42,19 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="border-b border-background-elevated hover:bg-background-elevated/40 transition-colors"
+      className="border-b border-white/5"
     >
       <td colSpan={8} className="p-0">
         <div>
           {/* Main Row */}
-          <div
-            className="grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 px-4 py-3 cursor-pointer items-center"
+          <motion.div
+            className={cn(
+              "grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 px-4 py-3 cursor-pointer items-center",
+              "glass-surface glass-surface-hover"
+            )}
             onClick={toggleExpand}
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.2 }}
           >
             {/* Executor Column */}
             <div className="flex items-center gap-3">
@@ -129,7 +134,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
                 Buy Now
               </Button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Expanded Details */}
           <AnimatePresence>

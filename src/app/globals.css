@@ -7,11 +7,20 @@
   --color-background-surface: #151A21;
   --color-background-elevated: #1E2329;
 
-  /* Accent Colors */
-  --color-primary: #5865F2; /* Discord blurple - CTAs */
+  /* Primary Colors with States */
+  --color-primary-DEFAULT: #5865F2; /* Discord blurple - CTAs */
+  --color-primary-hover: #4752C4;
+  --color-primary-active: #3C45A5;
+
+  /* Status Colors */
   --color-success: #43B581; /* Green - working/reputable */
   --color-danger: #F04747;  /* Red - not working/broken */
   --color-warning: #FAA61A; /* Amber - suspicious/partial */
+
+  /* Accent Colors (for glows and highlights) */
+  --color-accent-cyan: #00E5FF;
+  --color-accent-purple: #B24BF3;
+  --color-accent-plasma: #00FF88;
 
   /* Text Colors */
   --color-text-primary: #FFFFFF;
@@ -19,13 +28,22 @@
   --color-text-muted: #72767D;
 
   /* Typography */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", "Courier New", monospace;
+  --font-sans: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", "Courier New", monospace;
+
+  /* Glassmorphism Shadows */
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glass-hover: 0 8px 32px 0 rgba(88, 101, 242, 0.3);
+  --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.4);
+  --shadow-glow-purple: 0 0 20px rgba(178, 75, 243, 0.4);
+  --shadow-glow-success: 0 0 20px rgba(67, 181, 129, 0.4);
+  --shadow-glow-primary: 0 0 20px rgba(88, 101, 242, 0.4);
 
   /* Animations */
   --animate-fade-in: fadeIn 0.3s ease-in-out;
   --animate-slide-up: slideUp 0.3s ease-out;
   --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-pulse-glow: pulseGlow 2s ease-in-out infinite;
 
   /* Keyframes */
   @keyframes fadeIn {
@@ -54,6 +72,17 @@
     }
     50% {
       opacity: 0.5;
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.15);
     }
   }
 }
@@ -105,4 +134,70 @@ body {
 :focus-visible {
   outline: 2px solid theme(colors.primary);
   outline-offset: 2px;
+}
+
+/* Glassmorphism Utilities */
+.glass-surface {
+  background: linear-gradient(135deg, rgba(21, 26, 33, 0.6) 0%, rgba(30, 35, 41, 0.6) 100%);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-surface-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-surface-hover:hover {
+  background: linear-gradient(135deg, rgba(30, 35, 41, 0.8) 0%, rgba(30, 35, 41, 0.7) 100%);
+  backdrop-filter: blur(12px);
+  border-color: rgba(88, 101, 242, 0.4);
+  box-shadow: var(--shadow-glass-hover);
+  transform: translateY(-2px);
+}
+
+.glass-pill {
+  background: linear-gradient(135deg, rgba(21, 26, 33, 0.9) 0%, rgba(30, 35, 41, 0.9) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-pill:hover {
+  border-color: rgba(88, 101, 242, 0.6);
+  box-shadow: var(--shadow-glow-primary);
+  transform: translateY(-2px);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(21, 26, 33, 0.95) 0%, rgba(30, 35, 41, 0.95) 100%);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: var(--shadow-glass);
+}
+
+/* Status Dot with Glow */
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: var(--animate-pulse-glow);
+}
+
+.status-dot-working {
+  background: theme(colors.success);
+  box-shadow: 0 0 12px rgba(67, 181, 129, 0.6);
+}
+
+.status-dot-broken {
+  background: theme(colors.danger);
+  box-shadow: 0 0 12px rgba(240, 71, 71, 0.6);
+}
+
+.status-dot-partial {
+  background: theme(colors.warning);
+  box-shadow: 0 0 12px rgba(250, 166, 26, 0.6);
 }

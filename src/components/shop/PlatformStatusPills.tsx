@@ -51,13 +51,10 @@ export function PlatformStatusPills() {
               key={platform}
               onClick={() => toggleExpand(platform)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg transition-all",
-                "border border-background-elevated hover:border-primary/30",
-                isExpanded
-                  ? "bg-primary/10 border-primary/30"
-                  : "bg-background-surface"
+                "flex items-center gap-2 px-4 py-2 rounded-full transition-all glass-pill",
+                isExpanded && "border-primary/60"
               )}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
               <Icon className="h-4 w-4 text-text-secondary" />
@@ -77,8 +74,8 @@ export function PlatformStatusPills() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden bg-background-surface rounded-lg border border-background-elevated p-4"
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="overflow-hidden glass-card p-4"
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">

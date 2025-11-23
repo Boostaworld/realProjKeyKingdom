@@ -21,13 +21,16 @@ export function StatusIndicator({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
-        {/* Pulsing status dot */}
+        {/* Pulsing status dot with glow */}
         <div className="relative flex h-3 w-3">
-          {working && showPulse && (
+          {showPulse && (
             <motion.span
-              className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75"
+              className={cn(
+                "absolute inline-flex h-full w-full rounded-full opacity-75",
+                working ? "bg-success" : "bg-danger"
+              )}
               animate={{
-                scale: [1, 1.5, 1],
+                scale: [1, 1.8, 1],
                 opacity: [0.75, 0, 0.75],
               }}
               transition={{
@@ -40,7 +43,7 @@ export function StatusIndicator({
           <span
             className={cn(
               "relative inline-flex h-3 w-3 rounded-full",
-              working ? "bg-success" : "bg-danger"
+              working ? "status-dot-working" : "status-dot-broken"
             )}
           />
         </div>
