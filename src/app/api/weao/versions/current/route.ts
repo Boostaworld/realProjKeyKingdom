@@ -20,14 +20,10 @@ export async function GET() {
   try {
     const response = await fetch(WEAO_VERSIONS_URL, {
       headers: { "User-Agent": "WEAO-3PService" },
-      next: { revalidate: CACHE_TTL_MS / 1000 },
     });
 
     if (!response.ok) {
-      if (response.status === 502) {
-        console.error("WEAO upstream returned 502 for /versions/current");
-      }
-      throw new Error(`WEAO API returned ${response.status}`);
+      throw new Error(`WEAO returned ${response.status}`);
     }
 
     const data = await response.json();
@@ -37,21 +33,7 @@ export async function GET() {
       headers: { "X-Cache": "MISS" },
     });
   } catch (error) {
-    console.error("WEAO API error:", error);
-
-    if (cache) {
-      return NextResponse.json(cache.data, {
-        status: 200,
-        headers: {
-          "X-Cache": "STALE",
-          "X-Error": "Failed to fetch fresh WEAO versions, using cached data",
-        },
-      });
-    }
-
-    return NextResponse.json(
-      { error: "Failed to fetch from WEAO" },
-      { status: 502 }
-    );
+    console.error("WEAO error:", error);
+    return NextResponse.json({ error: "Failed" }, { status: 502 });
   }
 }
