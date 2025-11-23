@@ -25,6 +25,11 @@ export function PlatformStatusPills() {
   };
 
   const platforms = Object.keys(platformConfig) as PlatformKey[];
+  const expandedUpdatedAt =
+    expanded &&
+    (versions?.[`${expanded}Date` as keyof typeof versions] as
+      | string
+      | undefined);
 
   return (
     <div className="space-y-3">
@@ -33,7 +38,6 @@ export function PlatformStatusPills() {
           const Icon = platformConfig[platform].icon;
           const isExpanded = expanded === platform;
           const versionHash = versions?.[platform];
-          const updatedAt = versions?.[`${platform}Date` as keyof typeof versions] as string | undefined;
 
           return (
             <motion.button
@@ -102,8 +106,8 @@ export function PlatformStatusPills() {
               </div>
 
               <div className="text-xs text-text-muted">
-                {updatedAt
-                  ? `Updated ${formatRelativeTime(new Date(updatedAt))}`
+                {expandedUpdatedAt
+                  ? `Updated ${formatRelativeTime(new Date(expandedUpdatedAt))}`
                   : "Awaiting latest check"}
               </div>
             </div>
