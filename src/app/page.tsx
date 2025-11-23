@@ -5,49 +5,6 @@ import { ExecutorTable } from "@/components/shop/ExecutorTable";
 import { PlatformStatusPills } from "@/components/shop/PlatformStatusPills";
 import { useExecutors } from "@/lib/hooks/useExecutors";
 
-function FilterSection() {
-  return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold text-text-secondary mb-2">
-          Categories
-        </h3>
-        <div className="space-y-2">
-          {[
-            "Reputable executors",
-            "Suspicious executors",
-            "Verified only",
-          ].map((label) => (
-            <div
-              key={label}
-              className="flex items-center justify-between rounded-lg border border-white/5 bg-background-elevated/40 px-3 py-2 text-sm text-text-muted"
-            >
-              <span>{label}</span>
-              <span className="text-[11px] text-text-secondary">View</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-white/5 pt-4">
-        <h3 className="text-sm font-semibold text-text-secondary mb-2">
-          Commerce
-        </h3>
-        <div className="space-y-2 text-sm text-text-muted">
-          <div className="flex items-center justify-between rounded-lg border border-white/5 bg-background-elevated/40 px-3 py-2">
-            <span>Free / Paid</span>
-            <span className="text-[11px] text-text-secondary">All</span>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border border-white/5 bg-background-elevated/40 px-3 py-2">
-            <span>Offers & bundles</span>
-            <span className="text-[11px] text-text-secondary">Soon</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const { data: executors, isLoading, isError } = useExecutors();
 
@@ -102,11 +59,8 @@ export default function Home() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.05 }}
-          className="glass-card mb-6 p-4 shadow-glass"
+          className="mb-6"
         >
-          <h2 className="text-sm font-semibold text-text-secondary mb-3">
-            Platform Status
-          </h2>
           <PlatformStatusPills />
         </motion.div>
 
@@ -117,16 +71,8 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <aside className="w-full lg:w-64 lg:flex-shrink-0">
-            <div className="rounded-xl border border-white/10 bg-background-tertiary/60 p-4 backdrop-blur-md">
-              <FilterSection />
-            </div>
-          </aside>
-
-          <main className="flex-1">
-            {renderTable()}
-          </main>
+        <div>
+          <main className="w-full">{renderTable()}</main>
         </div>
       </div>
     </div>

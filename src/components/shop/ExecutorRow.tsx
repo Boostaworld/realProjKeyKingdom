@@ -5,7 +5,6 @@ import type React from "react";
 import { useMemo, useState } from "react";
 import { ChevronDown, Star } from "lucide-react";
 import { SuncBadge } from "@/components/shared/SuncBadge";
-import { StatusIndicator } from "@/components/shared/StatusIndicator";
 import { formatPrice, formatRelativeTime } from "@/lib/utils/formatters";
 import type { Executor } from "@/types/executor";
 
@@ -33,11 +32,11 @@ export function ExecutorRow({ executor }: ExecutorRowProps) {
   return (
     <>
       <motion.tr
-        className="cursor-pointer border-b border-white/5 bg-background-tertiary/40 transition-colors duration-200 hover:bg-primary/5"
+        className="cursor-pointer border-b border-white/5 bg-background-tertiary/40 transition-colors duration-200 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/10"
         onClick={() => setExpanded((prev) => !prev)}
         whileHover={{ backgroundColor: "rgba(88, 101, 242, 0.06)" }}
       >
-        <td className="px-4 py-3">
+        <td className="px-4 py-2.5">
           <div className="flex items-center gap-3">
             <motion.div
               animate={{ rotate: expanded ? 180 : 0 }}
@@ -56,17 +55,23 @@ export function ExecutorRow({ executor }: ExecutorRowProps) {
           </div>
         </td>
 
-        <td className="px-4 py-3 text-center">
+        <td className="px-4 py-2.5 text-center">
           <div className="flex justify-center">
             <SuncBadge rating={executor.suncRating} size="sm" showLabel={false} showGlow={false} />
           </div>
         </td>
 
-        <td className="px-4 py-3 text-center">
-          <StatusIndicator status={executor.status} compact />
+        <td className="px-4 py-2.5 text-center">
+          <div className="flex items-center justify-center">
+            <div
+              className={`h-2.5 w-2.5 rounded-full animate-pulse ${
+                executor.status.working ? "bg-success" : "bg-danger"
+              }`}
+            />
+          </div>
         </td>
 
-        <td className="px-4 py-3 text-center">
+        <td className="px-4 py-2.5 text-center">
           <div className="flex flex-wrap items-center justify-center gap-1 text-xs text-text-secondary">
             {platforms.map((platform) => (
               <span
@@ -79,7 +84,7 @@ export function ExecutorRow({ executor }: ExecutorRowProps) {
           </div>
         </td>
 
-        <td className="px-4 py-3 text-center">
+        <td className="px-4 py-2.5 text-center">
           <div className="flex items-center justify-center gap-1 text-sm text-text-primary">
             <Star className="h-4 w-4 text-warning" />
             <span>{executor.rating.average.toFixed(1)}</span>
@@ -87,14 +92,14 @@ export function ExecutorRow({ executor }: ExecutorRowProps) {
           </div>
         </td>
 
-        <td className="px-4 py-3 text-center">
+        <td className="px-4 py-2.5 text-center">
           <span className="font-medium text-text-primary">
             {executor.pricing.rawCostString ||
               formatPrice(executor.pricing.price, executor.pricing.currency)}
           </span>
         </td>
 
-        <td className="px-4 py-3 text-right">
+        <td className="px-4 py-2.5 text-right">
           <button
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/80"
             onClick={handlePurchase}

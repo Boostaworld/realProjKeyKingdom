@@ -32,8 +32,8 @@ export function PlatformStatusPills() {
       | undefined);
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-3 flex-wrap">
+    <div>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         {platforms.map((platform) => {
           const Icon = platformConfig[platform].icon;
           const isExpanded = expanded === platform;
@@ -80,7 +80,6 @@ export function PlatformStatusPills() {
         })}
       </div>
 
-      {/* Expanded Version Info */}
       <AnimatePresence>
         {expanded && (
           <motion.div

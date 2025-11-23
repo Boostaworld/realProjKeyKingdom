@@ -17,15 +17,15 @@ export function SuncBadge({
   const { label, color, hexColor, glowColor } = formatSuncRating(rating);
 
   const sizeClasses = {
-    sm: "text-lg w-16 h-16",
-    md: "text-2xl w-20 h-20",
-    lg: "text-4xl w-28 h-28",
+    sm: "text-sm w-10 h-10",
+    md: "text-base w-12 h-12",
+    lg: "text-xl w-16 h-16",
   };
 
   const labelSizes = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-base",
+    sm: "text-[10px]",
+    md: "text-xs",
+    lg: "text-sm",
   };
 
   return (
