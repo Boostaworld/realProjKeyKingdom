@@ -69,20 +69,14 @@ export function useRDD() {
       addLog('info', `Channel: ${config.channel}`);
       addLog('info', config.version ? `Version: ${config.version}` : 'Version: Latest');
 
-      const cdnBase = config.channel === 'LIVE'
-        ? 'https://setup.rbxcdn.com'
-        : `https://setup.rbxcdn.com/channel/${config.channel}`;
-
       const manifestResult = await fetchManifest(binaryType, config.channel, config.version, addLog);
       addLog('success', `Resolved version ${manifestResult.version}`);
 
-      const versionPath = `${cdnBase}/${manifestResult.version}`;
-
       // Download based on platform
       if (config.platform === 'windows') {
-        await downloadWindows(versionPath, binaryType, config, manifestResult.packages, addLog, setProgress);
+        await downloadWindows(manifestResult.version, config.channel, binaryType, config, manifestResult.packages, addLog, setProgress);
       } else {
-        await downloadMac(versionPath, binaryType, config, addLog);
+        await downloadMac(manifestResult.version, config.channel, binaryType, config, addLog);
       }
 
       addLog('success', 'Download complete!');
@@ -153,7 +147,8 @@ async function fetchManifest(
 }
 
 async function downloadWindows(
-  versionPath: string,
+  version: string,
+  channel: string,
   binaryType: string,
   config: RDDConfig,
   packages: RDDPackage[],
@@ -175,7 +170,11 @@ async function downloadWindows(
     if (!packageName) continue;
 
     addLog('progress', `Downloading ${packageName}...`);
-    const packageUrl = `${versionPath}-${packageName}`;
+    const packageUrl = `/api/rdd/package?${new URLSearchParams({
+      channel,
+      version,
+      file: packageName,
+    }).toString()}`;
 
     try {
       const packageResponse = await fetch(packageUrl);
@@ -231,14 +230,19 @@ async function downloadWindows(
 }
 
 async function downloadMac(
-  versionPath: string,
+  version: string,
+  channel: string,
   binaryType: string,
   config: RDDConfig,
   addLog: (type: RDDLog['type'], message: string) => void
 ) {
   // Mac is a single ZIP download
   const filename = binaryType === 'MacStudio' ? 'RobloxStudioApp.zip' : 'RobloxPlayer.zip';
-  const url = `${versionPath}-${filename}`;
+  const url = `/api/rdd/package?${new URLSearchParams({
+    channel,
+    version,
+    file: filename,
+  }).toString()}`;
 
   addLog('info', `Downloading ${filename}...`);
 
