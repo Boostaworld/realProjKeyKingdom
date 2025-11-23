@@ -36,12 +36,12 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      whileHover={{ y: -6, scale: 1.01, boxShadow: "0 14px 32px rgba(88, 101, 242, 0.25)" }}
-      className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[rgba(21,26,33,0.9)] to-[rgba(30,35,41,0.95)] backdrop-blur-2xl shadow-glass transition-all duration-300"
+      transition={{ delay: index * 0.05, duration: 0.2 }}
+      whileHover={{ y: -4, boxShadow: "0 12px 24px rgba(88, 101, 242, 0.15)" }}
+      className="relative overflow-hidden rounded-xl border border-white/10 bg-background-tertiary/60 backdrop-blur-md shadow-lg transition-all duration-200"
     >
       {/* Card Header */}
-      <div className="p-4 space-y-3">
+      <div className="p-6 space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
             <div className="w-12 h-12 rounded-xl bg-[rgba(30,35,41,0.7)] border border-white/10 backdrop-blur-xl flex items-center justify-center text-2xl shrink-0 shadow-inner shadow-glass">
