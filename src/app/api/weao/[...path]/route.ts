@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const UPSTREAM_BASE = "https://weao.xyz/api";
+const UPSTREAM_BASE = "https://weao.gg/api";
 
 const CACHE_TTL_MS = {
   versions: 5 * 60 * 1000, // 5 minutes
@@ -42,6 +42,10 @@ export async function GET(
 
     const data = await upstream.json();
     const status = upstream.status;
+
+    if (status === 502) {
+      console.error("WEAO upstream returned 502", { path });
+    }
 
     if (upstream.ok) {
       memoryCache.set(path, {

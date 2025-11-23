@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const WEAO_BASE_URL = "https://weao.xyz/api";
+const WEAO_BASE_URL = "https://weao.gg/api";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 interface CachedData {
@@ -43,9 +43,13 @@ export async function GET() {
     // Fetch current versions from WEAO
     const response = await fetch(`${WEAO_BASE_URL}/versions/current`, {
       headers: { "User-Agent": "WEAO-3PService" },
+      next: { revalidate: CACHE_TTL_MS / 1000 },
     });
 
     if (!response.ok) {
+      if (response.status === 502) {
+        console.error("WEAO upstream returned 502 for /versions/current");
+      }
       throw new Error(`WEAO API returned ${response.status}`);
     }
 
