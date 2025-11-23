@@ -49,10 +49,10 @@ export function ExecutorTable() {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-background-elevated bg-background-surface">
+    <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[rgba(21,26,33,0.85)] backdrop-blur-2xl shadow-glass">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-background-elevated bg-background-elevated/40">
+          <tr className="border-b border-white/5 bg-white/5 backdrop-blur-xl">
             <th className="px-4 py-3 text-left text-sm font-semibold text-text-secondary" colSpan={8}>
               <div className="grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 items-center">
                 <div>Executor</div>

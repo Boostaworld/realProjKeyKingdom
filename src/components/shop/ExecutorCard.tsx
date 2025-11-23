@@ -37,13 +37,14 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="bg-background-surface rounded-lg border border-background-elevated overflow-hidden"
+      whileHover={{ y: -6, scale: 1.01, boxShadow: "0 14px 32px rgba(88, 101, 242, 0.25)" }}
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[rgba(21,26,33,0.9)] to-[rgba(30,35,41,0.95)] backdrop-blur-2xl shadow-glass transition-all duration-300"
     >
       {/* Card Header */}
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
-            <div className="w-12 h-12 rounded-lg bg-background-elevated flex items-center justify-center text-2xl shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[rgba(30,35,41,0.7)] border border-white/10 backdrop-blur-xl flex items-center justify-center text-2xl shrink-0 shadow-inner shadow-glass">
               {executor.name[0]}
             </div>
             <div className="flex-1 min-w-0">
@@ -83,7 +84,7 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
           {platforms.map((platform) => (
             <div
               key={platform}
-              className="h-6 px-2 rounded-full bg-background-elevated text-[11px] text-text-secondary flex items-center capitalize"
+              className="h-6 px-2 rounded-full bg-white/5 border border-white/10 text-[11px] text-text-secondary flex items-center capitalize backdrop-blur-md shadow-inner"
             >
               {platform}
             </div>
@@ -92,7 +93,7 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
         </div>
 
         {/* Price & Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-background-elevated">
+        <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="font-semibold text-lg text-text-primary">
             {formatPrice(executor.pricing.price)}
           </div>
@@ -124,7 +125,7 @@ export function ExecutorCard({ executor, index }: ExecutorCardProps) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden bg-background-elevated/20 border-t border-background-elevated"
+            className="overflow-hidden border-t border-white/10 bg-[rgba(21,26,33,0.85)] backdrop-blur-2xl"
           >
             <div className="p-4 space-y-4">
               <div>
