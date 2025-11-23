@@ -5,19 +5,21 @@ interface SuncBadgeProps {
   rating: number;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
+  showGlow?: boolean;
 }
 
 export function SuncBadge({
   rating,
   size = "md",
   showLabel = true,
+  showGlow = true,
 }: SuncBadgeProps) {
-  const { label, color } = formatSuncRating(rating);
+  const { label, color, hexColor, glowColor } = formatSuncRating(rating);
 
   const sizeClasses = {
-    sm: "text-lg",
-    md: "text-2xl",
-    lg: "text-4xl",
+    sm: "text-lg w-16 h-16",
+    md: "text-2xl w-20 h-20",
+    lg: "text-4xl w-28 h-28",
   };
 
   const labelSizes = {
@@ -27,21 +29,32 @@ export function SuncBadge({
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-1">
       <div
         className={cn(
-          "font-bold tabular-nums",
-          sizeClasses[size],
-          color
+          "flex flex-col items-center justify-center rounded-xl",
+          "backdrop-filter backdrop-blur-md",
+          "border-2 transition-all duration-300",
+          sizeClasses[size]
         )}
+        style={{
+          background: `linear-gradient(135deg, rgba(21, 26, 33, 0.9) 0%, rgba(30, 35, 41, 0.9) 100%)`,
+          borderColor: hexColor,
+          boxShadow: showGlow ? glowColor : "0 4px 16px rgba(0, 0, 0, 0.3)",
+        }}
       >
-        {rating}
-      </div>
-      {showLabel && (
-        <div className={cn("text-text-muted font-medium", labelSizes[size])}>
-          {label}
+        <div
+          className={cn("font-bold tabular-nums font-mono", color)}
+          style={{ textShadow: showGlow ? `0 0 8px ${hexColor}40` : "none" }}
+        >
+          {rating}
         </div>
-      )}
+        {showLabel && (
+          <div className={cn("text-text-muted font-medium uppercase tracking-wide", labelSizes[size])}>
+            sUNC
+          </div>
+        )}
+      </div>
     </div>
   );
 }
