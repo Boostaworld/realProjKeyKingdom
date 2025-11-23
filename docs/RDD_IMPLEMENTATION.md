@@ -4,14 +4,87 @@
 
 ---
 
+## Implementation Status
+
+✅ **COMPLETED** - RDD is fully functional and returns ZIP files as expected.
+
+**Last Updated:** 2025-11-23
+
+---
+
 ## Purpose
 
-This document specifies how to integrate RDD (Roblox Deployment Downloader) functionality into Key-Kingdom, matching inject.today's implementation while maintaining Key-Kingdom's brand identity and design system.
+This document specifies the RDD (Roblox Deployment Downloader) implementation in Key-Kingdom, which matches the upstream rdd.latte.to behavior while maintaining Key-Kingdom's brand identity and design system.
 
 **Related Documentation:**
 - `docs/UI_DESIGN_SYSTEM.md` - Visual specifications for RDD components
 - `docs/components/rdd-components.md` - Detailed component specs
 - `docs/APP_SPEC.md` - Overall application structure
+- `docs/WEAO_FALLBACK.md` - WEAO API integration and fallback mechanism
+
+---
+
+## Current Implementation Summary
+
+### How It Works
+
+Key-Kingdom's RDD implementation is **fully functional** and correctly downloads Roblox binaries as ZIP files (NOT bootstrapper.exe files). The implementation consists of:
+
+1. **Frontend Hook** (`src/lib/rdd/useRDD.ts`):
+   - Manages download state, logs, and progress
+   - Fetches manifest from `/api/rdd/manifest`
+   - Downloads packages via `/api/rdd/package`
+   - Uses JSZip to extract and assemble packages client-side
+   - Outputs ZIP file: `${channel}-${binaryType}-${version}.zip`
+
+2. **Manifest API** (`src/app/api/rdd/manifest/route.ts`):
+   - Resolves version from Roblox clientsettings (v2 with v1 fallback)
+   - Fetches `rbxPkgManifest.txt` from Roblox CDN
+   - Parses manifest and returns package list
+   - Handles channel-specific paths and fallbacks
+
+3. **Package API** (`src/app/api/rdd/package/route.ts`):
+   - Proxies individual package downloads from Roblox CDN
+   - Handles both ZIP packages and non-ZIP files (like installers)
+   - Sets appropriate headers for download
+
+4. **UI Components** (`src/components/rdd/*`):
+   - `RDDConfig.tsx` - Configuration panel with platform/channel/version selection
+   - `VersionSelect.tsx` - Version selection (latest vs specific)
+   - `RDDTerminal.tsx` - Terminal-style log output
+   - `ProgressBar.tsx` - Visual progress indicator
+
+### Output Format
+
+The RDD tool produces ZIP files with the following naming convention:
+
+```
+{channel}-{binaryType}-{version}.zip
+```
+
+**Examples:**
+- `LIVE-WindowsPlayer-version-abc123def456.zip`
+- `LIVE-WindowsStudio64-version-abc123def456.zip`
+- `LIVE-MacPlayer-version-abc123def456.zip`
+
+### Supported Platforms
+
+| Platform      | Binary Type      | Blob Directory |
+|---------------|------------------|----------------|
+| Windows Player | WindowsPlayer    | `/`            |
+| Windows Studio | WindowsStudio64  | `/`            |
+| Mac Player    | MacPlayer        | `/mac/`        |
+| Mac Studio    | MacStudio        | `/mac/`        |
+
+### Version Resolution
+
+**Priority order:**
+1. Explicit version provided by user → Use as-is
+2. "Latest" requested → Try clientsettings v2 API
+3. v2 fails → Fall back to clientsettings v1 API
+4. Both fail → Return error
+
+See `docs/WEAO_FALLBACK.md` for detailed fallback logic.
 
 ---
 

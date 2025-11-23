@@ -41,7 +41,12 @@ export function VersionSelect({ value, onChange }: VersionSelectProps) {
 
       {/* Mode-specific UI */}
       {mode === 'latest' && (
-        <div className="p-3 bg-background-surface rounded-lg border border-white/10">
+        <div
+          className="p-3 rounded-lg border border-white/10 backdrop-blur-sm"
+          style={{
+            background: 'linear-gradient(135deg, rgba(21, 26, 33, 0.7) 0%, rgba(30, 35, 41, 0.7) 100%)',
+          }}
+        >
           <div className="text-sm text-text-secondary">
             Will download the latest available version from Roblox CDN
           </div>
@@ -54,9 +59,9 @@ export function VersionSelect({ value, onChange }: VersionSelectProps) {
             placeholder="version-31fc142272764f02"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            className="font-mono text-sm"
+            className="font-mono text-sm px-4"
           />
-          <div className="text-xs text-text-muted">
+          <div className="text-xs text-text-muted px-1">
             Enter a specific version hash (with or without &quot;version-&quot; prefix)
           </div>
         </div>

@@ -3,7 +3,7 @@ import { formatSuncRating } from "@/lib/utils/formatters";
 
 interface SuncBadgeProps {
   rating: number;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   showLabel?: boolean;
   showGlow?: boolean;
 }
@@ -18,14 +18,16 @@ export function SuncBadge({
 
   const sizeClasses = {
     sm: "text-sm w-10 h-10",
-    md: "text-base w-12 h-12",
-    lg: "text-xl w-16 h-16",
+    md: "text-lg w-14 h-14",
+    lg: "text-2xl w-20 h-20",
+    xl: "text-3xl w-24 h-24",
   };
 
   const labelSizes = {
     sm: "text-[10px]",
     md: "text-xs",
     lg: "text-sm",
+    xl: "text-base",
   };
 
   return (

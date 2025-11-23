@@ -10,27 +10,58 @@ interface ManifestPackage {
 async function resolveVersion(platform: string, channel: string, requestedVersion?: string) {
   // Respect explicit versions
   if (requestedVersion && requestedVersion !== 'latest') {
-    return requestedVersion.startsWith('version-') ? requestedVersion : `version-${requestedVersion}`;
+    const normalized = requestedVersion.startsWith('version-') ? requestedVersion : `version-${requestedVersion}`;
+    console.log(`[RDD] Using explicit version: ${normalized}`);
+    return normalized;
   }
 
-  const versionEndpoint = channel === 'LIVE'
+  // Try v2 endpoint first (more reliable)
+  const v2Endpoint = channel === 'LIVE'
+    ? `https://clientsettings.roblox.com/v2/client-version/${platform}`
+    : `https://clientsettings.roblox.com/v2/client-version/${platform}/channel/${channel}`;
+
+  console.log(`[RDD] Resolving version for ${platform} on ${channel} channel via ${v2Endpoint}`);
+
+  try {
+    const versionResponse = await fetch(v2Endpoint);
+
+    if (versionResponse.ok) {
+      const versionJson = await versionResponse.json() as { clientVersionUpload?: string; version?: string };
+      const resolvedVersion = versionJson.clientVersionUpload || versionJson.version;
+
+      if (resolvedVersion) {
+        const normalized = resolvedVersion.startsWith('version-') ? resolvedVersion : `version-${resolvedVersion}`;
+        console.log(`[RDD] Resolved version: ${normalized}`);
+        return normalized;
+      }
+    }
+
+    console.warn(`[RDD] v2 endpoint failed with ${versionResponse.status}, trying v1`);
+  } catch (err) {
+    console.warn(`[RDD] v2 endpoint error:`, err);
+  }
+
+  // Fallback to v1 endpoint
+  const v1Endpoint = channel === 'LIVE'
     ? `https://clientsettings.roblox.com/v1/client-version/${platform}`
     : `https://clientsettings.roblox.com/v1/client-version/${platform}/channel/${channel}`;
 
-  const versionResponse = await fetch(versionEndpoint);
+  const versionResponse = await fetch(v1Endpoint);
 
   if (!versionResponse.ok) {
-    throw new Error(`Failed to resolve latest version: ${versionResponse.statusText || versionResponse.status}`);
+    throw new Error(`Failed to resolve latest version from both v2 and v1 endpoints: ${versionResponse.statusText || versionResponse.status}`);
   }
 
   const versionJson = await versionResponse.json() as { clientVersionUpload?: string; version?: string };
   const resolvedVersion = versionJson.clientVersionUpload || versionJson.version;
 
   if (!resolvedVersion) {
-    throw new Error('Version response was missing clientVersionUpload');
+    throw new Error('Version response was missing clientVersionUpload from both v2 and v1 endpoints');
   }
 
-  return resolvedVersion.startsWith('version-') ? resolvedVersion : `version-${resolvedVersion}`;
+  const normalized = resolvedVersion.startsWith('version-') ? resolvedVersion : `version-${resolvedVersion}`;
+  console.log(`[RDD] Resolved version from v1: ${normalized}`);
+  return normalized;
 }
 
 function parseManifest(manifestText: string): ManifestPackage[] {
@@ -133,7 +164,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('RDD proxy error:', error);
+    console.error('[RDD] Manifest proxy error:', {
+      platform,
+      channel,
+      version,
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       {
         error: 'Failed to fetch from Roblox CDN',

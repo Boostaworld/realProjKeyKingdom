@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useMemo, useState } from "react";
-import { ChevronDown, Star } from "lucide-react";
+import { ChevronDown, Star, CheckCircle2 } from "lucide-react";
 import { SuncBadge } from "@/components/shared/SuncBadge";
 import { formatPrice, formatRelativeTime } from "@/lib/utils/formatters";
 import type { Executor } from "@/types/executor";
@@ -128,9 +128,12 @@ export function ExecutorRow({ executor }: ExecutorRowProps) {
                   {executor.features.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-text-primary mb-2">Key Features</h4>
-                      <ul className="list-inside list-disc space-y-1 text-sm text-text-secondary">
+                      <ul className="space-y-1.5 text-sm text-text-secondary">
                         {executor.features.map((feature, index) => (
-                          <li key={index}>{feature}</li>
+                          <li key={index} className="flex items-start gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
