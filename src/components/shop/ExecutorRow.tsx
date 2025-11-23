@@ -50,7 +50,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
           <motion.div
             className={cn(
               "grid grid-cols-[1fr,80px,150px,120px,120px,100px,100px,140px] gap-4 px-4 py-3 cursor-pointer items-center",
-              "glass-surface glass-surface-hover"
+              "glass-surface glass-surface-hover rounded-xl border border-white/10 shadow-glass"
             )}
             onClick={toggleExpand}
             whileHover={{ y: -2 }}
@@ -64,7 +64,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
               >
                 <ChevronDown className="h-4 w-4 text-text-muted" />
               </motion.div>
-              <div className="w-10 h-10 rounded-lg bg-background-elevated flex items-center justify-center text-2xl">
+              <div className="w-10 h-10 rounded-lg bg-[rgba(30,35,41,0.65)] border border-white/10 backdrop-blur-lg flex items-center justify-center text-2xl shadow-inner">
                 {executor.name[0]}
               </div>
               <div>
@@ -144,7 +144,7 @@ export function ExecutorRow({ executor, index }: ExecutorRowProps) {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="overflow-hidden bg-background-elevated/20"
+                className="overflow-hidden rounded-xl border border-white/10 bg-[rgba(21,26,33,0.85)] backdrop-blur-2xl shadow-glass"
               >
                 <div className="p-6 grid grid-cols-2 gap-6">
                   {/* Left Column */}

@@ -30,7 +30,7 @@ export default function Home() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-6"
         >
-          <div className="bg-background-surface rounded-lg border border-background-elevated p-4">
+          <div className="glass-card p-4 shadow-glass">
             <h2 className="text-sm font-semibold text-text-secondary mb-3">
               Platform Status
             </h2>
