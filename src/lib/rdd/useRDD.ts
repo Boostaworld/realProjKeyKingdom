@@ -184,14 +184,22 @@ async function downloadWindows(
 
       const packageData = await packageResponse.arrayBuffer();
 
-      addLog('progress', `Extracting ${packageName}...`);
-      const packageZip = await JSZip.loadAsync(packageData);
+      // Some manifest entries (e.g., RobloxPlayerInstaller.exe) are not ZIPs. Add them directly.
+      const isZip = packageName.toLowerCase().endsWith('.zip');
 
-      // Extract files to final ZIP
-      for (const [filename, file] of Object.entries(packageZip.files)) {
-        if (!file.dir) {
-          const content = await file.async('arraybuffer');
-          finalZip.file(filename, content);
+      if (!isZip) {
+        addLog('progress', `Adding ${packageName} to bundle...`);
+        finalZip.file(packageName, packageData);
+      } else {
+        addLog('progress', `Extracting ${packageName}...`);
+        const packageZip = await JSZip.loadAsync(packageData);
+
+        // Extract files to final ZIP
+        for (const [filename, file] of Object.entries(packageZip.files)) {
+          if (!file.dir) {
+            const content = await file.async('arraybuffer');
+            finalZip.file(filename, content);
+          }
         }
       }
 
