@@ -1,30 +1,66 @@
-import { FilterBar } from "@/components/shop/FilterBar";
-import { ExecutorTable } from "@/components/shop/ExecutorTable";
+"use client";
+
+import { motion } from "framer-motion";
+import { ExecutorList } from "@/components/shop/ExecutorList";
+import { PlatformStatusPills } from "@/components/shop/PlatformStatusPills";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background-DEFAULT">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-text-primary mb-2">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-5xl font-bold text-text-primary mb-3">
             Key-Kingdom
           </h1>
-          <p className="text-lg text-text-secondary">
-            Browse, compare, and purchase Roblox executors safely
+          <p className="text-xl text-text-secondary">
+            Browse and purchase Roblox executors safely • Sorted by sUNC safety rating
           </p>
-        </div>
+        </motion.div>
 
-        {/* Filter Bar */}
-        <FilterBar />
+        {/* Platform Status Pills */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-6"
+        >
+          <div className="bg-background-surface rounded-lg border border-background-elevated p-4">
+            <h2 className="text-sm font-semibold text-text-secondary mb-3">
+              Platform Status
+            </h2>
+            <PlatformStatusPills />
+          </div>
+        </motion.div>
 
-        {/* Main Table - Sorted by sUNC (highest safety first) */}
-        <ExecutorTable />
+        {/* Executor List (Table on Desktop, Cards on Mobile) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <ExecutorList />
+        </motion.div>
 
         {/* Footer Note */}
-        <div className="mt-6 text-center text-sm text-text-muted">
-          Executors sorted by sUNC safety rating (highest first)
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-6 text-center"
+        >
+          <p className="text-sm text-text-muted">
+            ✨ Click any executor to expand and view detailed information
+          </p>
+          <p className="text-xs text-text-muted mt-1">
+            Updated in real-time via WEAO API
+          </p>
+        </motion.div>
       </div>
     </div>
   );
