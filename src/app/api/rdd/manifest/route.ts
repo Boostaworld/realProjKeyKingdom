@@ -27,9 +27,13 @@ export async function GET(request: NextRequest) {
       headers: { 'content-type': contentType },
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('RDD proxy error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch from Roblox CDN' },
+      {
+        error: 'Failed to fetch from Roblox CDN',
+        detail: errorMessage,
+      },
       { status: 502 },
     );
   }
