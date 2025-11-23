@@ -243,4 +243,14 @@ When any agent makes a **breaking change** to behavior, it should:
 
 ---
 
+# AGENTS.md
+
+## Setup
+- Run: npm install
+
+## Verification
+- Run: npm run lint
+- Run: npm run build
+- Run: npm test
+
 By following this file, all agents—human or AI—stay aligned on what Key-Kingdom is, how it behaves, and how to extend it without accidentally turning it back into “just a status tracker.”
