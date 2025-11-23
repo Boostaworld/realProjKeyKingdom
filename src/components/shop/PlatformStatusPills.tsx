@@ -33,7 +33,7 @@ export function PlatformStatusPills() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         {platforms.map((platform) => {
           const Icon = platformConfig[platform].icon;
           const isExpanded = expanded === platform;
