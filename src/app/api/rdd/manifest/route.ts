@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const baseUrl = channel === 'LIVE'
       ? 'https://setup.rbxcdn.com'
       : `https://setup.rbxcdn.com/channel/${channel}`;
-    const cdnUrl = `${baseUrl}/version-${version}-${platform}`;
+    const cdnUrl = `${baseUrl}/${version.startsWith('version-') ? version : `version-${version}`}-${platform}`;
 
     const response = await fetch(cdnUrl);
 
