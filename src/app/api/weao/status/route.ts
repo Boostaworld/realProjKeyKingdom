@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { WeaoPlatformStatusResponse } from "@/types/weao";
 
 const WEAO_BASE_URL = "https://weao.gg/api";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -9,21 +10,6 @@ interface CachedData {
 }
 
 let cache: CachedData | null = null;
-
-export interface PlatformStatus {
-  platform: string;
-  version: string;
-  lastUpdated: string;
-  status: "stable" | "partial" | "broken";
-}
-
-export interface WeaoPlatformStatusResponse {
-  Windows: PlatformStatus;
-  Mac: PlatformStatus;
-  Android: PlatformStatus;
-  iOS: PlatformStatus;
-  lastFetched: string;
-}
 
 /**
  * GET /api/weao/status
