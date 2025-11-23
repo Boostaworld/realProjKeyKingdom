@@ -6,9 +6,9 @@
 
 ## Implementation Status
 
-✅ **COMPLETED & ENHANCED** - RDD is fully functional with advanced controls matching inject.today/rdd.
+✅ **COMPLETED & OPTIMIZED** - RDD now delegates to Latte's battle-tested implementation for maximum performance.
 
-**Last Updated:** 2025-11-23 (Enhanced with compression level control, binary type dropdown, and improved UI)
+**Last Updated:** 2025-11-23 (Refactored to delegate all downloads to rdd.latte.to for optimal speed and reliability)
 
 ---
 
@@ -26,54 +26,67 @@ This document specifies the RDD (Roblox Deployment Downloader) implementation in
 
 ## Current Implementation Summary
 
-### How It Works
+### How It Works (New Delegated Architecture)
 
-Key-Kingdom's RDD implementation is **fully functional** and correctly downloads Roblox binaries as ZIP files (NOT bootstrapper.exe files). The implementation consists of:
+Key-Kingdom's RDD implementation now **delegates all downloads to rdd.latte.to** for optimal performance and reliability. Instead of doing client-side ZIP assembly ourselves, we:
+
+1. **Provide a clean UI** for configuration
+2. **Resolve versions automatically** (if requested) via WEAO or Roblox clientsettings API
+3. **Build the correct URL** for Latte's RDD service
+4. **Redirect the user** to rdd.latte.to with all parameters
+
+### Why This Approach?
+
+**Performance**: Latte's RDD is battle-tested and optimized. No more "1% per minute" slow assembly.
+
+**Maintenance**: We don't need to maintain JSZip assembly code or handle edge cases - Latte's team does that.
+
+**Reliability**: rdd.latte.to has been serving thousands of downloads for years with proven stability.
+
+### Architecture Components
 
 1. **Frontend Hook** (`src/lib/rdd/useRDD.ts`):
-   - Manages download state, logs, and progress
-   - Fetches manifest from `/api/rdd/manifest`
-   - Downloads packages via `/api/rdd/package`
-   - Uses JSZip to extract and assemble packages client-side
-   - **NEW**: Configurable compression level (1-9 scale) for optimal performance/size balance
-   - Outputs ZIP file: `${channel}-${binaryType}-${version}.zip`
+   - Manages download state and logs
+   - Resolves version (if auto mode)
+   - Builds Latte RDD URL via `buildRddUrl()`
+   - Opens URL in new window
+   - No JSZip, no client-side assembly!
 
-2. **Manifest API** (`src/app/api/rdd/manifest/route.ts`):
-   - Resolves version from Roblox clientsettings (v2 with v1 fallback)
-   - Integrates with WEAO fallback mechanism for reliability
-   - Fetches `rbxPkgManifest.txt` from Roblox CDN
-   - Parses manifest and returns package list
-   - Handles channel-specific paths and fallbacks
+2. **URL Builder** (`src/lib/rdd/buildRddUrl.ts`):
+   - Constructs correct URL for rdd.latte.to
+   - Handles parameters: `channel`, `binaryType`, `version`, `compressZip`, `compressionLevel`
+   - Example: `https://rdd.latte.to/?channel=LIVE&binaryType=WindowsPlayer&version=version-abc123&compressZip=true&compressionLevel=5`
 
-3. **Package API** (`src/app/api/rdd/package/route.ts`):
-   - Proxies individual package downloads from Roblox CDN
-   - Handles both ZIP packages and non-ZIP files (like installers)
-   - Sets appropriate headers for download
-   - No server-side assembly - all processing happens client-side
+3. **Version Resolver** (`src/lib/rdd/resolveVersion.ts`):
+   - Resolves latest version for auto mode
+   - Tries WEAO first (via `/api/weao/versions/current`)
+   - Falls back to Roblox clientsettings API (v2 → v1)
+   - Handles 502 errors gracefully
 
 4. **UI Components** (`src/components/rdd/*`):
-   - `RDDConfig.tsx` - Configuration panel with **enhanced controls**:
+   - `RDDConfig.tsx` - Configuration panel with:
      - Binary type dropdown (WindowsPlayer, WindowsStudio64, MacPlayer, MacStudio)
      - Channel selector (LIVE, Beta)
      - Version mode toggle (Latest vs Manual)
      - Compression toggle with level slider (1-9)
-   - `VersionSelect.tsx` - Version mode selection with WEAO integration
+   - `VersionSelect.tsx` - Version mode selection
    - `RDDTerminal.tsx` - Terminal-style log output with copy/clear functions
-   - `ProgressBar.tsx` - Animated progress indicator
-   - `LogLine.tsx` - Colored log messages with timestamps
+   - Logs show version resolution and URL construction process
 
 ### Output Format
 
-The RDD tool produces ZIP files with the following naming convention:
+Latte's RDD service produces ZIP files with standard naming:
 
 ```
-{channel}-{binaryType}-{version}.zip
+{binaryType}-{version}.zip
 ```
 
 **Examples:**
-- `LIVE-WindowsPlayer-version-abc123def456.zip`
-- `LIVE-WindowsStudio64-version-abc123def456.zip`
-- `LIVE-MacPlayer-version-abc123def456.zip`
+- `WindowsPlayer-version-abc123def456.zip`
+- `WindowsStudio64-version-abc123def456.zip`
+- `MacPlayer-version-abc123def456.zip`
+
+The download is handled entirely by rdd.latte.to in the new browser tab/window.
 
 ### Supported Platforms
 
@@ -86,30 +99,32 @@ The RDD tool produces ZIP files with the following naming convention:
 
 ### Version Resolution
 
-**New Enhanced Flow:**
+**Version Resolution Flow:**
 1. **Latest Version Mode** (versionMode: 'latest'):
-   - Automatically resolves latest version via `/api/rdd/manifest`
-   - Uses clientsettings v2 API (with v1 fallback)
-   - Falls back to WEAO proxy if Roblox APIs fail
+   - Calls `resolveLatestVersion()` from `src/lib/rdd/resolveVersion.ts`
+   - Tries WEAO first via `/api/weao/versions/current`
+   - Falls back to Roblox clientsettings API (v2 → v1) if WEAO fails
+   - Handles 502 errors gracefully - logs warning but doesn't break
    - Displays resolved version in terminal logs
 
 2. **Manual Version Mode** (versionMode: 'manual'):
    - User provides exact version hash
    - Accepts with or without "version-" prefix
    - No API calls needed - uses version as-is
+   - Skips resolution and goes straight to URL building
 
 See `docs/WEAO_FALLBACK.md` for detailed fallback logic.
 
 ### Compression Control
 
-**New Feature:**
+**Compression Settings:**
 - Toggle compression on/off
 - Compression levels 1-9:
   - **1-3**: Fast compression, larger files (ideal for quick tests)
-  - **4-6**: Balanced (default: 6)
+  - **4-6**: Balanced (default: 5)
   - **7-9**: Maximum compression, slower processing (ideal for distribution)
-- Level displayed in terminal logs
-- Compression only affects final ZIP generation, not individual packages
+- Settings are passed to Latte's RDD via URL parameters
+- Latte's RDD handles all compression logic - we just provide the UI
 
 ---
 
@@ -1126,23 +1141,39 @@ worker.onmessage = (e) => {
 
 ## Recent Changes (2025-11-23)
 
-### Added
-- ✅ **Compression Level Control**: 1-9 slider for balancing speed vs size
-- ✅ **Binary Type Dropdown**: Cleaner single dropdown replacing platform + target buttons
-- ✅ **Version Mode Toggle**: Clear separation between "Latest" and "Manual" modes
-- ✅ **Improved UI Spacing**: Better padding, alignment, and visual hierarchy
-- ✅ **Enhanced Terminal**: Better log colors, timestamps, and copy/clear functions
+### 🚀 **MAJOR REFACTOR: Delegated Architecture**
 
-### Fixed
-- ✅ **WEAO Integration**: Properly integrated with fallback mechanism
-- ✅ **Compression Speed**: User can now choose faster compression levels
-- ✅ **UI Consistency**: Matches Key-Kingdom glassmorphic design system
+**What Changed:**
+- ✅ **Removed client-side JSZip assembly** - No more slow "1% per minute" processing
+- ✅ **Delegated to Latte's RDD** - All downloads now go through rdd.latte.to
+- ✅ **Simplified codebase** - ~400 lines of JSZip code removed
+- ✅ **Faster downloads** - Latte's battle-tested parallel download implementation
+- ✅ **Better reliability** - Proven stability from thousands of successful downloads
 
-### Technical Improvements
-- Updated `RDDConfig` interface to include `versionMode` and `compressionLevel`
-- Refactored `VersionSelect` component to handle mode changes
-- Enhanced terminal logging to show compression level
-- Improved type safety across all RDD components
+**How It Works Now:**
+1. User configures download in Key-Kingdom UI
+2. If "Latest" mode: resolve version from WEAO/clientsettings
+3. Build URL: `https://rdd.latte.to/?channel=LIVE&binaryType=WindowsPlayer&version=...&compressZip=true&compressionLevel=5`
+4. Open URL in new window
+5. Latte's RDD handles everything: manifest, packages, ZIP assembly, download
+
+**Files Changed:**
+- `src/lib/rdd/useRDD.ts` - Complete rewrite (120 lines vs 400+ before)
+- `src/lib/rdd/buildRddUrl.ts` - New helper for URL construction
+- `src/lib/rdd/resolveVersion.ts` - New helper for version resolution
+- `src/components/rdd/RDDConfig.tsx` - Updated to use `binaryType` instead of `platform`/`target`
+- `src/app/tools/rdd/page.tsx` - Updated config structure
+- `docs/RDD_IMPLEMENTATION.md` - Complete documentation rewrite
+
+**API Routes (Now Optional):**
+- `/api/rdd/manifest` - No longer used, can be removed
+- `/api/rdd/package` - No longer used, can be removed
+- `/api/weao/versions/current` - Still used for version resolution in "Latest" mode
+
+**Migration Notes:**
+- Old config had `platform` + `target`, new config has `binaryType`
+- Default compression level changed from 6 to 5 (Latte's default)
+- No more progress tracking - download happens in external tab
 
 ---
 
