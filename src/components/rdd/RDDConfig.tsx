@@ -34,71 +34,27 @@ export function RDDConfig({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Platform */}
+        {/* Binary Type Dropdown */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Platform</label>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => onChange({ ...config, platform: 'windows' })}
-              className={`p-3 rounded-lg border transition-all ${
-                config.platform === 'windows'
-                  ? 'bg-primary border-primary text-white'
-                  : 'bg-background-surface border-white/10 text-text-secondary hover:border-primary/50'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
-                </svg>
-                <span className="font-medium">Windows</span>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => onChange({ ...config, platform: 'mac' })}
-              className={`p-3 rounded-lg border transition-all ${
-                config.platform === 'mac'
-                  ? 'bg-primary border-primary text-white'
-                  : 'bg-background-surface border-white/10 text-text-secondary hover:border-primary/50'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                </svg>
-                <span className="font-medium">Mac</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Target */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Target</label>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => onChange({ ...config, target: 'player' })}
-              className={`p-3 rounded-lg border transition-all ${
-                config.target === 'player'
-                  ? 'bg-primary border-primary text-white'
-                  : 'bg-background-surface border-white/10 text-text-secondary hover:border-primary/50'
-              }`}
-            >
-              <span className="font-medium">Player</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onChange({ ...config, target: 'studio' })}
-              className={`p-3 rounded-lg border transition-all ${
-                config.target === 'studio'
-                  ? 'bg-primary border-primary text-white'
-                  : 'bg-background-surface border-white/10 text-text-secondary hover:border-primary/50'
-              }`}
-            >
-              <span className="font-medium">Studio</span>
-            </button>
+          <label className="text-sm font-medium text-text-primary">Binary Type</label>
+          <select
+            value={`${config.platform}-${config.target}`}
+            onChange={(e) => {
+              const [platform, target] = e.target.value.split('-') as ['windows' | 'mac', 'player' | 'studio'];
+              onChange({ ...config, platform, target });
+            }}
+            className="w-full h-11 px-4 rounded-lg border border-white/10 bg-background-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-colors backdrop-blur-sm"
+            style={{
+              background: 'linear-gradient(135deg, rgba(21, 26, 33, 0.7) 0%, rgba(30, 35, 41, 0.7) 100%)',
+            }}
+          >
+            <option value="windows-player">WindowsPlayer</option>
+            <option value="windows-studio">WindowsStudio64</option>
+            <option value="mac-player">MacPlayer</option>
+            <option value="mac-studio">MacStudio</option>
+          </select>
+          <div className="text-xs text-text-muted px-1">
+            Select the Roblox binary type to download
           </div>
         </div>
 
@@ -120,28 +76,58 @@ export function RDDConfig({
 
         {/* Version */}
         <VersionSelect
-          value={config.version}
-          onChange={(v) => onChange({ ...config, version: v })}
+          config={config}
+          onChange={(updates) => onChange({ ...config, ...updates })}
         />
       </div>
 
-      {/* Compression Toggle */}
-      <div className="flex items-center gap-3 p-4 bg-background-surface rounded-lg border border-white/10">
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={config.compress}
-            onChange={(e) => onChange({ ...config, compress: e.target.checked })}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-        </label>
-        <div className="flex-1">
-          <div className="font-medium text-text-primary text-sm">Enable Compression</div>
-          <div className="text-xs text-text-muted">
-            Reduces file size but takes longer to process
+      {/* Compression Settings */}
+      <div className="space-y-4 p-4 bg-background-surface rounded-lg border border-white/10">
+        <div className="flex items-center gap-3">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={config.compress}
+              onChange={(e) => onChange({ ...config, compress: e.target.checked })}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+          <div className="flex-1">
+            <div className="font-medium text-text-primary text-sm">Enable Compression</div>
+            <div className="text-xs text-text-muted">
+              Compress the output ZIP file to reduce size
+            </div>
           </div>
         </div>
+
+        {/* Compression Level */}
+        {config.compress && (
+          <div className="space-y-2 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-text-primary">
+                Compression Level
+              </label>
+              <span className="text-sm font-mono text-primary">{config.compressionLevel}</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="9"
+              value={config.compressionLevel}
+              onChange={(e) => onChange({ ...config, compressionLevel: parseInt(e.target.value) })}
+              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+            />
+            <div className="flex justify-between text-xs text-text-muted">
+              <span>1 (Fastest)</span>
+              <span>5 (Balanced)</span>
+              <span>9 (Best)</span>
+            </div>
+            <div className="text-xs text-text-muted px-1">
+              Higher levels provide better compression but take longer to process
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Download Button */}

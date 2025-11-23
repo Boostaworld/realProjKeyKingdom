@@ -12,7 +12,9 @@ export default function RDDPage() {
     target: 'player' as const,
     channel: 'LIVE',
     version: '',
+    versionMode: 'latest' as const,
     compress: true,
+    compressionLevel: 6, // Balanced compression (0-9 scale)
   });
 
   const { logs, progress, isDownloading, startDownload, clearLogs } = useRDD();
