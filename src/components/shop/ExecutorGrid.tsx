@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState } from "react";
 import type { Executor } from "@/types/executor";
 import { ExecutorCard } from "./ExecutorCard";
+import { ExecutorModal } from "./ExecutorModal";
 
 interface ExecutorGridProps {
   executors: Executor[];
@@ -24,18 +26,24 @@ const item = {
 };
 
 export function ExecutorGrid({ executors }: ExecutorGridProps) {
+  const [selectedExecutor, setSelectedExecutor] = useState<Executor | null>(null);
+
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-    >
-      {executors.map((executor) => (
-        <motion.div key={executor.id} variants={item}>
-          <ExecutorCard executor={executor} />
-        </motion.div>
-      ))}
-    </motion.div>
+    <>
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+      >
+        {executors.map((executor) => (
+          <motion.div key={executor.id} variants={item}>
+            <ExecutorCard executor={executor} onClick={() => setSelectedExecutor(executor)} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      <ExecutorModal executor={selectedExecutor} onClose={() => setSelectedExecutor(null)} />
+    </>
   );
 }
