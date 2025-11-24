@@ -43,7 +43,9 @@ export function ExecutorGrid({ executors }: ExecutorGridProps) {
         ))}
       </motion.div>
 
-      <ExecutorModal executor={selectedExecutor} onClose={() => setSelectedExecutor(null)} />
+      {selectedExecutor && (
+        <ExecutorModal executor={selectedExecutor} onClose={() => setSelectedExecutor(null)} />
+      )}
     </>
   );
 }
