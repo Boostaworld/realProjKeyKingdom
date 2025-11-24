@@ -1,0 +1,384 @@
+# UI Redesign: Premium ExecutorCard & Modal
+
+**Problem**: Current UI looks unprofessional with poor spacing, ugly placeholders, and boring layout.
+
+**Solution**: Complete redesign based on inject.today and key-empire.com aesthetics.
+
+---
+
+## 📸 Visual Mockups
+
+### ExecutorCard (Redesigned)
+![ExecutorCard Mockup](executor_card_mockup_1763945997107.png)
+
+**Key Design Elements**:
+- **Horizontal layout** (landscape, ~3:1 aspect ratio)
+- **Large logo area** on the left (40% width) with vibrant gradient or actual image
+- **Clean info section** on the right with proper hierarchy
+- **Inline sUNC badge** (top-right, small pill)
+- **Bottom row**: Platform icons (left) + Price (right)
+
+### ExecutorModal (Redesigned)
+![ExecutorModal Mockup](executor_modal_mockup_1763946013838.png)
+
+**Key Design Elements**:
+- **Compact, focused** modal (not excessive empty space)
+- **sUNC badge inline** with title
+
+ (not floating alone in top-left)
+- **Logo centered** under title
+- **2-column feature grid** with checkmarks
+- **Clear visual hierarchy** with proper spacing
+
+---
+
+## 🎨 Detailed Design Specs
+
+### ExecutorCard Component
+
+**Dimensions**:
+- Width: Full container width (responsive)
+- Height: ~120px
+- Aspect Ratio: Maintain landscape feel
+
+**Structure**:
+```
+┌──────────────────────────────────────────────────────┐
+│  [Logo/Image Area]  │  [Executor Name]  [98% sUNC]  │
+│      (Gradient      │  Brief description text       │
+│       or Image)     │  [Win][Mac] ──────── [Free]   │
+└──────────────────────────────────────────────────────┘
+```
+
+**CSS Specifications**:
+```css
+.executor-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  height: 120px;
+  background: linear-gradient(135deg, #1a1f2e 0%, #151a21 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.executor-card:hover {
+  border-color: rgba(88, 101, 242, 0.5);
+  transform: translateY(-2px);
+}
+
+.logo-area {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* OR use actual image: background-image: url(...) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+}
+
+.info-section {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.executor-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.sunc-badge {
+  background: rgba(88, 101, 242, 0.15);
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #5865f2;
+  white-space: nowrap;
+}
+
+.description {
+  font-size: 13px;
+  color: #8b92a8;
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.platform-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.platform-icon {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-tag {
+  font-size: 14px;
+  font-weight: 600;
+  color: #43b581; /* Green for free */
+  /* OR color: #faa61a for paid */
+}
+```
+
+---
+
+### ExecutorModal Component
+
+**Dimensions**:
+- Max-width: 550px
+- Padding: 32px
+- Border-radius: 16px
+
+**Structure**:
+```
+┌───────────────────────────────────────────┐
+│  Solara [98% sUNC]              [X Close] │
+│                                           │
+│            [Executor Logo]                │
+│              (120x120)                    │
+│                                           │
+│  "Trusted free executor with excellent   │
+│   stability and safety..."                │
+│                                           │
+│  Key Features                             │
+│  ✓ Level 8 Executor    ✓ No Key System   │
+│  ✓ 98% sUNC           ✓ Weekly Updates   │
+│                                           │
+│  [Windows] [Mac] [Mobile]                 │
+│                                           │
+│  Status: Working • Updated 2d ago         │
+│                                           │
+│  [Download Now] [Visit Website]           │
+└───────────────────────────────────────────┘
+```
+
+**CSS Specifications**:
+```css
+.executor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 14, 17, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+}
+
+.executor-modal {
+  max-width: 550px;
+  margin: 0 auto;
+  margin-top: 10vh;
+  background: linear-gradient(135deg, #1a1f2e 0%, #151a21 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.close-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.logo-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+}
+
+.description-text {
+  font-size: 14px;
+  color: #8b92a8;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.features-section {
+  margin-bottom: 24px;
+}
+
+.features-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #c7cdd8;
+}
+
+.checkmark {
+  color: #43b581;
+  font-size: 14px;
+}
+
+.platform-badges-modal {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.platform-badge-large {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #c7cdd8;
+}
+
+.status-row {
+  text-align: center;
+  font-size: 13px;
+  color: #8b92a8;
+  margin-bottom: 24px;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-primary {
+  padding: 14px;
+  background: #5865f2;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #c7cdd8;
+  cursor: pointer;
+}
+```
+
+---
+
+## 🛠️ Implementation Guide for Claude Code
+
+### Step 1: Update ExecutorCard.tsx
+
+**Changes**:
+1. Switch from vertical to **horizontal grid layout** (logo left, info right)
+2. Add **gradient placeholder** for logo area (or use actual image if available)
+3. Move sUNC badge **inline with name** (not separate)
+4. Add **bottom row** with platforms + price
+5. Remove "View Details" overlay (keep simple)
+
+### Step 2: Update ExecutorModal.tsx
+
+**Changes**:
+1. Reduce excessive padding and empty space
+2. Put **sUNC badge inline** with title in header
+3. Center logo **under title** (not above)
+4. Make **features grid** cleaner with proper styling
+5. Reduce modal max-width to 550px
+6. Improve **button styling** with better colors
+
+### Step 3: Logo Handling
+
+**Option A** (If no images available):
+```typescript
+const logoGradients = [
+  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+];
+
+// Assign based on executor ID hash
+const gradient = logoGradients[executor.id.charCodeAt(0) % logoGradients.length];
+```
+
+**Option B** (If images exist in `public/executors/`):
+```typescript
+<img src={`/executors/${executor.slug}.png`} alt={executor.name} />
+```
+
+---
+
+## 📝 Complete Code for Claude Code
+
+I'll create a separate file with the full React components ready to copy-paste.
