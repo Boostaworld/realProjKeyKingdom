@@ -1,14 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ExecutorTable } from "@/components/shop/ExecutorTable";
+import { ExecutorGrid } from "@/components/shop/ExecutorGrid";
 import { PlatformStatusPills } from "@/components/shop/PlatformStatusPills";
+import { LoadingIntro } from "@/components/shared/LoadingIntro";
 import { useExecutors } from "@/lib/hooks/useExecutors";
 
 export default function Home() {
+  const [showContent, setShowContent] = useState(false);
   const { data: executors, isLoading, isError } = useExecutors();
 
-  const renderTable = () => {
+  const renderGrid = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center py-16">
@@ -37,44 +40,43 @@ export default function Home() {
       );
     }
 
-    return <ExecutorTable executors={executors} />;
+    return <ExecutorGrid executors={executors} />;
   };
 
   return (
-    <div className="min-h-screen bg-background-DEFAULT">
-      <div className="container mx-auto max-w-7xl px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-6"
-        >
-          <h1 className="text-5xl font-bold text-text-primary mb-3">Key-Kingdom</h1>
-          <p className="text-xl text-text-secondary">
-            Executor marketplace • Sorted by sUNC safety rating
-          </p>
-        </motion.div>
+    <>
+      <LoadingIntro onComplete={() => setShowContent(true)} />
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
-          className="mb-6"
-        >
-          <PlatformStatusPills />
-        </motion.div>
+      {showContent && (
+        <div className="min-h-screen bg-background-DEFAULT">
+          <div className="container mx-auto max-w-7xl px-4 py-8">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mb-6"
+            >
+              <h1 className="text-5xl font-bold text-text-primary mb-3">Key-Kingdom</h1>
+              <p className="text-xl text-text-secondary">
+                Executor marketplace • Sorted by sUNC safety rating
+              </p>
+            </motion.div>
 
-        <div className="glass-card mb-6 p-4 shadow-glass text-sm text-text-muted">
-          <p>
-            Compact table layout with collapsible rows. Click any executor to
-            expand details.
-          </p>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.05 }}
+              className="mb-6"
+            >
+              <PlatformStatusPills />
+            </motion.div>
+
+            <div>
+              <main className="w-full">{renderGrid()}</main>
+            </div>
+          </div>
         </div>
-
-        <div>
-          <main className="w-full">{renderTable()}</main>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

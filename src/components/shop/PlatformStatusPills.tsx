@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, Copy, Check } from "lucide-react";
 import { useRobloxVersions } from "@/lib/hooks/useRobloxVersions";
 import { usePlatformStatus } from "@/lib/hooks/usePlatformStatus";
 import { formatRelativeTime } from "@/lib/utils/formatters";
@@ -137,13 +137,16 @@ export function PlatformStatusPills() {
 
                 <div className="space-y-1">
                   <div className="text-xs text-text-muted">Version Hash</div>
-                  <code className="block rounded-lg px-3 py-1.5 font-mono text-sm text-text-primary border border-white/10 backdrop-blur-sm"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(30, 35, 41, 0.65) 0%, rgba(21, 26, 33, 0.65) 100%)',
-                    }}
-                  >
-                  {platformStatuses?.[expanded]?.version ?? versions?.[expanded] ?? "Awaiting data"}
-                  </code>
+                  <div className="relative">
+                    <code className="block rounded-lg px-3 py-1.5 pr-10 font-mono text-sm text-text-primary border border-white/10 backdrop-blur-sm select-all"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(30, 35, 41, 0.65) 0%, rgba(21, 26, 33, 0.65) 100%)',
+                      }}
+                    >
+                      {platformStatuses?.[expanded]?.version ?? versions?.[expanded] ?? "Awaiting data"}
+                    </code>
+                    <CopyButton text={platformStatuses?.[expanded]?.version ?? versions?.[expanded] ?? ""} />
+                  </div>
                 </div>
 
                 <div className="text-xs text-text-muted">
@@ -164,5 +167,29 @@ export function PlatformStatusPills() {
           )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-white/10 transition"
+      title="Copy version hash"
+    >
+      {copied ? (
+        <Check className="h-4 w-4 text-success" />
+      ) : (
+        <Copy className="h-4 w-4 text-text-muted" />
+      )}
+    </button>
   );
 }
